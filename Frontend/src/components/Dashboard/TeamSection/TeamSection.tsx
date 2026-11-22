@@ -4,7 +4,6 @@ import TeamStatusCard from "./TeamStatusCard.tsx";
 import TeamMembers from "./TeamMembers.tsx";
 import InvitesList from "./InvitesList.tsx";
 import LoadingSpinner from "../Common/LoadingSpinner.tsx";
-import { Button } from "@/components/ui/button";
 
 interface TeamSectionProps {
   teamData: any;
@@ -49,37 +48,42 @@ const TeamSection = ({
 
   if (!teamData) {
     return (
-      <div className="text-center py-16 md:py-20">
-        <div className="w-20 h-20 mx-auto mb-6 text-gray-500 flex items-center justify-center bg-white/5 rounded-full">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-10 w-10" 
-            fill="none" 
-            viewBox="0 0 24 24" 
+      <div className="empty">
+        <span className="empty-icon" aria-hidden="true">
+          <svg
+            className="icon-lg"
+            viewBox="0 0 24 24"
+            fill="none"
             stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
-        </div>
-        <h2 className="text-2xl font-bold mb-4">شما هنوز تیمی ندارید</h2>
-        <p className="text-gray-400 mb-8 max-w-md mx-auto">
+        </span>
+        <p className="empty-text">شما هنوز تیمی ندارید</p>
+        <p className="small text-muted">
           برای شرکت در مسابقه، ابتدا یک تیم تشکیل دهید
         </p>
-        <Button
-          onClick={onCreateTeam}
-          className="bg-[#FFD500] hover:bg-[#e6c200] text-[#00274D] font-semibold px-8 py-3 rounded-lg"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 ml-2" 
-            fill="none" 
-            viewBox="0 0 24 24" 
+        <button type="button" className="btn btn-primary" onClick={onCreateTeam}>
+          <svg
+            className="icon-sm"
+            viewBox="0 0 24 24"
+            fill="none"
             stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <path d="M12 4v16m8-8H4" />
           </svg>
           تشکیل تیم جدید
-        </Button>
+        </button>
       </div>
     );
   }
@@ -119,13 +123,10 @@ const TeamSection = ({
         <TeamMembers members={teamData.members} />
       )}
 
-      <div className="text-center pt-4">
-        <Button
-          onClick={onRefresh}
-          className="bg-[#FFD500] hover:bg-[#e6c200] text-[#00274D] font-semibold py-3 px-8 rounded-lg transition-all duration-200"
-        >
+      <div className="row">
+        <button type="button" className="btn btn-secondary" onClick={onRefresh}>
           بروزرسانی اطلاعات تیم
-        </Button>
+        </button>
       </div>
     </div>
   );
