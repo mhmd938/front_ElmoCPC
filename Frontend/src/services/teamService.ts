@@ -12,6 +12,24 @@ import type {
 } from "@/types/teamTypes";
 
 import { getData, postData, putData, deleteData, postImageData } from "./services";
+import { USE_MOCKS } from "./mock/flags";
+import {
+  getTeamForDashboardService as mockGetTeamForDashboard,
+  createTeamService as mockCreateTeam,
+  getTeamService as mockGetTeam,
+  updateTeamService as mockUpdateTeam,
+  deleteTeamService as mockDeleteTeam,
+  inviteUserService as mockInviteUser,
+  getInvitesService as mockGetInvites,
+  cancelInviteService as mockCancelInvite,
+  removeMemberService as mockRemoveMember,
+  acceptInviteService as mockAcceptInvite,
+  rejectInviteService as mockRejectInvite,
+  leaveTeamService as mockLeaveTeam,
+  submitTeamService as mockSubmitTeam,
+  uploadReceiptService as mockUploadReceipt,
+  getAllTeamStatusesService as mockGetAllTeamStatuses,
+} from "./mock/mockTeam";
 
 // تایپ برای تیم در داشبورد
 export type DashboardTeam = {
@@ -44,35 +62,50 @@ export const translateTeamStatus = (status: string): string => {
   return statusMap[status] || status;
 };
 
-// تابع برای دریافت رنگ status
-export const getStatusColor = (status: string): string => {
-  const colorMap: { [key: string]: string } = {
-    'draft': 'text-gray-400 bg-gray-500/20',
-    'submitted': 'text-blue-400 bg-blue-500/20',
-    'waiting_for_payment': 'text-yellow-400 bg-yellow-500/20',
-    'receipt_pending': 'text-orange-400 bg-orange-500/20', 
-    'accepted': 'text-green-400 bg-green-500/20',
-    'rejected': 'text-red-400 bg-red-500/20'
+export type TeamStatusPill =
+  | "is-draft"
+  | "is-submitted"
+  | "is-waiting"
+  | "is-receipt"
+  | "is-accepted"
+  | "is-rejected";
+
+// تابع برای دریافت کلاس طراحی وضعیت
+export const getStatusPillClass = (status: string): TeamStatusPill => {
+  const pillMap: { [key: string]: TeamStatusPill } = {
+    draft: "is-draft",
+    submitted: "is-submitted",
+    waiting_for_payment: "is-waiting",
+    receipt_pending: "is-receipt",
+    accepted: "is-accepted",
+    rejected: "is-rejected",
   };
-  return colorMap[status] || 'text-gray-400 bg-gray-500/20';
+  return pillMap[status] || "is-draft";
 };
 
 // تابع برای دریافت وضعیت ثبت‌نام کاربر
-export const getUserRegistrationStatus = (teamData: DashboardTeam | null): { text: string; color: string } => {
+export const getUserRegistrationStatus = (
+  teamData: DashboardTeam | null
+): { text: string; color: TeamStatusPill } => {
   if (!teamData) {
-    return { text: 'ثبت‌نام نشده', color: 'text-red-400 bg-red-500/20' };
+    return { text: "ثبت‌نام نشده", color: "is-rejected" };
   }
 
-  const statusMap: { [key: string]: { text: string; color: string } } = {
-    'draft': { text: 'پیش‌نویس', color: 'text-gray-400 bg-gray-500/20' },
-    'submitted': { text: 'ثبت شده', color: 'text-blue-400 bg-blue-500/20' },
-    'waiting_for_payment': { text: 'در انتظار پرداخت', color: 'text-yellow-400 bg-yellow-500/20' },
-    'receipt_pending': { text: 'در انتظار تایید', color: 'text-orange-400 bg-orange-500/20' },
-    'accepted': { text: 'تایید شده', color: 'text-green-400 bg-green-500/20' },
-    'rejected': { text: 'رد شده', color: 'text-red-400 bg-red-500/20' }
+  const statusMap: { [key: string]: { text: string; color: TeamStatusPill } } = {
+    draft: { text: "پیش‌نویس", color: "is-draft" },
+    submitted: { text: "ثبت شده", color: "is-submitted" },
+    waiting_for_payment: { text: "در انتظار پرداخت", color: "is-waiting" },
+    receipt_pending: { text: "در انتظار تایید", color: "is-receipt" },
+    accepted: { text: "تایید شده", color: "is-accepted" },
+    rejected: { text: "رد شده", color: "is-rejected" },
   };
 
-  return statusMap[teamData.status] || { text: 'نامشخص', color: 'text-gray-400 bg-gray-500/20' };
+  return (
+    statusMap[teamData.status] || {
+      text: "نامشخص",
+      color: "is-draft",
+    }
+  );
 };
 
 /* -----------------------------------------
@@ -80,6 +113,7 @@ export const getUserRegistrationStatus = (teamData: DashboardTeam | null): { tex
    دریافت اطلاعات تیم برای نمایش در داشبورد
 ----------------------------------------- */
 export const getTeamForDashboardService = async (): Promise<DashboardTeam> => {
+  if (USE_MOCKS) return mockGetTeamForDashboard();
   try {
     const response = await getData({
       endPoint: "/v1/user/teams",
@@ -119,6 +153,7 @@ export const getTeamForDashboardService = async (): Promise<DashboardTeam> => {
 export const createTeamService = async (
   payload: CreateTeamPayload
 ): Promise<CreateTeamSuccessResponse> => {
+  if (USE_MOCKS) return mockCreateTeam(payload);
   return postData({
     endPoint: "/v1/user/teams",
     data: payload,
@@ -129,6 +164,7 @@ export const createTeamService = async (
    GET TEAM
 ----------------------------------------- */
 export const getTeamService = async (): Promise<Team> => {
+  if (USE_MOCKS) return mockGetTeam();
   return getData({
     endPoint: "/v1/user/teams",
   });
@@ -141,6 +177,7 @@ export const updateTeamService = async (
   teamId: string,
   payload: UpdateTeamPayload
 ): Promise<Team> => {
+  if (USE_MOCKS) return mockUpdateTeam(teamId, payload);
   return putData({
     endPoint: `/v1/user/teams/${teamId}`,
     data: payload,
@@ -151,6 +188,7 @@ export const updateTeamService = async (
    DELETE TEAM
 ----------------------------------------- */
 export const deleteTeamService = async (teamId: string): Promise<void> => {
+  if (USE_MOCKS) return mockDeleteTeam(teamId);
   return deleteData({
     endPoint: `/v1/user/teams/${teamId}`,
   });
@@ -163,6 +201,7 @@ export const inviteUserService = async (
   teamId: string,
   payload: InviteUserPayload
 ): Promise<void> => {
+  if (USE_MOCKS) return mockInviteUser(teamId, payload);
   return postData({
     endPoint: `/v1/user/teams/${teamId}/invitations`,
     data: payload,
@@ -181,6 +220,7 @@ interface InvitesResponse {
 }
 
 export const getInvitesService = async (teamId: string): Promise<InvitesResponse> => {
+  if (USE_MOCKS) return mockGetInvites(teamId);
   return getData({
     endPoint: `/v1/user/teams/${teamId}/invitations/pending`,
   });
@@ -189,6 +229,7 @@ export const getInvitesService = async (teamId: string): Promise<InvitesResponse
    CANCEL INVITE
 ----------------------------------------- */
 export const cancelInviteService = async (invitetoken: string, inviteTeamid: string): Promise<void> => {
+  if (USE_MOCKS) return mockCancelInvite(invitetoken, inviteTeamid);
   return deleteData({
     endPoint: `/v1/user/teams/${inviteTeamid}/invitations/${invitetoken}`,
   });
@@ -201,6 +242,7 @@ export const removeMemberService = async (
   teamId: string,
   memberId: string
 ): Promise<void> => {
+  if (USE_MOCKS) return mockRemoveMember(teamId, memberId);
   return deleteData({
     endPoint: `/v1/user/teams/${teamId}/members/${memberId}`,
   });
@@ -210,6 +252,7 @@ export const removeMemberService = async (
    ACCEPT INVITE
 ----------------------------------------- */
 export const acceptInviteService = async (token: string): Promise<void> => {
+  if (USE_MOCKS) return mockAcceptInvite(token);
   return postData({
     endPoint: `/v1/invitations/accept-team`,
     data: { token }, // 👈 این مهمه
@@ -220,6 +263,7 @@ export const acceptInviteService = async (token: string): Promise<void> => {
    REJECT INVITE
 ----------------------------------------- */
 export const rejectInviteService = async (token: string): Promise<void> => {
+  if (USE_MOCKS) return mockRejectInvite(token);
   return postData({
     endPoint: `/v1/invitations/reject-team`,
     data: { token }, // 👈 حتماً آبجکت باشه
@@ -231,6 +275,7 @@ export const rejectInviteService = async (token: string): Promise<void> => {
    LEAVE TEAM
 ----------------------------------------- */
 export const leaveTeamService = async (teamId: string): Promise<void> => {
+  if (USE_MOCKS) return mockLeaveTeam(teamId);
   return postData({
     endPoint: `/v1/user/teams/${teamId}/leave`,
     data: {},
@@ -241,6 +286,7 @@ export const leaveTeamService = async (teamId: string): Promise<void> => {
    SUBMIT TEAM
 ----------------------------------------- */
 export const submitTeamService = async (teamId: string): Promise<void> => {
+  if (USE_MOCKS) return mockSubmitTeam(teamId);
   return postData({
     endPoint: `/v1/user/teams/${teamId}/submit`,
     data: {},
@@ -254,6 +300,7 @@ export const uploadReceiptService = async (
   teamId: string,
   formData: FormData
 ): Promise<void> => {
+  if (USE_MOCKS) return mockUploadReceipt(teamId, formData);
   return postImageData({
     endPoint: `/v1/user/teams/${teamId}/upload-receipt`,
     data: formData,
@@ -264,6 +311,7 @@ export const uploadReceiptService = async (
    GET ALL TEAM STATUSES
 ----------------------------------------- */
 export const getAllTeamStatusesService = async (): Promise<TeamStatus[]> => {
+  if (USE_MOCKS) return mockGetAllTeamStatuses();
   return getData({
     endPoint: "/v1/user/teams/statuses",
   });
