@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import BaseModal from "../BaseModal";
+import SubmitTeamModal from "../SubmitTeamModal";
 import UploadReceiptModal from "../UploadReceiptModal";
 
 describe("BaseModal design classes", () => {
@@ -64,5 +65,29 @@ describe("UploadReceiptModal design classes", () => {
 
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
+  });
+});
+
+describe("SubmitTeamModal design classes", () => {
+  it("renders step one with design modal and buttons", () => {
+    const { container } = render(
+      <SubmitTeamModal
+        isOpen
+        onClose={vi.fn()}
+        teamName="تیم کوانتوم"
+        memberCount={3}
+        pendingInvites={0}
+        onSubmit={async () => true}
+      />
+    );
+
+    expect(screen.getByText("آمادگی برای ثبت نهایی")).toBeInTheDocument();
+    expect(container.querySelector(".modal")).toBeInTheDocument();
+    expect(container.querySelector(".modal-head")).toBeInTheDocument();
+    expect(container.querySelector(".btn.btn-ghost")).toBeInTheDocument();
+    expect(container.querySelector(".btn.btn-primary")).toBeInTheDocument();
+    expect(container.innerHTML).not.toMatch(
+      /#FFD500|#00274D|bg-(white|blue|green|red|yellow|purple|gray)-/
+    );
   });
 });

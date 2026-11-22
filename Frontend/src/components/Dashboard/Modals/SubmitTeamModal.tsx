@@ -8,7 +8,6 @@ import {
   X,
   ChevronRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import BaseModal from "./BaseModal";
 
 interface SubmitTeamModalProps {
@@ -67,16 +66,9 @@ const SubmitTeamModal = ({
 
   const handleNextStep = () => {
     if (currentStep === 1) {
-      if (!canSubmit) {
-        setCurrentStep(2); // Show requirements check
-      } else {
-        setCurrentStep(3); // Go to final confirmation
-      }
-    } else if (currentStep === 2) {
-      // If requirements are met, go to final step
-      if (canSubmit) {
-        setCurrentStep(3);
-      }
+      setCurrentStep(canSubmit ? 3 : 2);
+    } else if (currentStep === 2 && canSubmit) {
+      setCurrentStep(3);
     }
   };
 
@@ -121,29 +113,29 @@ const SubmitTeamModal = ({
       <div className="flex items-center">
         {[1, 2, 3].map((stepNum) => (
           <div key={stepNum} className="flex items-center">
-            <div
-              className={`
-              w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-              ${
+            <span
+              className={`badge ${
                 currentStep === stepNum
-                  ? "bg-[#FFD500] text-[#00274D]"
+                  ? "badge-cyan"
                   : currentStep > stepNum
-                  ? "bg-green-500/20 text-green-400"
-                  : "bg-white/10 text-gray-400"
-              }
-            `}
+                    ? "badge-success"
+                    : "badge-neutral"
+              }`}
             >
               {currentStep > stepNum ? (
-                <CheckCircle className="w-4 h-4" />
+                <CheckCircle className="icon-sm" aria-hidden="true" />
               ) : (
                 stepNum
               )}
-            </div>
+            </span>
             {stepNum < 3 && (
-              <div
-                className={`w-12 h-0.5 mx-2 ${
-                  currentStep > stepNum ? "bg-green-400" : "bg-white/10"
-                }`}
+              <span
+                className="w-12 h-0.5 mx-2"
+                style={{
+                  background:
+                    currentStep > stepNum ? "var(--success)" : "var(--border)",
+                }}
+                aria-hidden="true"
               />
             )}
           </div>
@@ -159,80 +151,72 @@ const SubmitTeamModal = ({
       case 1:
         return (
           <>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-blue-400" />
-              </div>
+            <div className="row">
+              <span className="stat-icon is-cyan" aria-hidden="true">
+                <AlertCircle className="icon" />
+              </span>
               <div>
-                <h3 className="text-lg font-bold">آمادگی برای ثبت نهایی</h3>
-                <p className="text-sm text-gray-400">مرحله ۱ از ۳</p>
+                <h3 className="card-title">آمادگی برای ثبت نهایی</h3>
+                <p className="small text-muted">مرحله ۱ از ۳</p>
               </div>
             </div>
 
-            <div className="space-y-4 mb-6">
-              <div className="bg-gradient-to-r from-[#FFD500]/10 to-transparent border border-[#FFD500]/20 rounded-lg p-4">
-                <h4 className="font-bold text-[#FFD500] mb-2 flex items-center gap-2">
-                  <Users className="w-4 h-4" />
+            <div className="stack">
+              <div className="card">
+                <h4 className="card-title row">
+                  <Users className="icon-sm" aria-hidden="true" />
                   {teamName}
                 </h4>
-                <p className="text-sm text-gray-300">
+                <p className="card-text">
                   برای ثبت نهایی تیم خود، لطفاً شرایط زیر را بررسی کنید.
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300">تعداد اعضای فعلی:</span>
-                    <span className="font-bold">{memberCount} نفر</span>
-                  </div>
-                </div>
+              <div className="payment-cell row between">
+                <span className="text-muted">تعداد اعضای فعلی:</span>
+                <strong>{memberCount} نفر</strong>
+              </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300">دعوت‌های در انتظار:</span>
-                    <span
-                      className={`font-bold ${
-                        hasPendingInvites ? "text-red-400" : "text-green-400"
-                      }`}
-                    >
-                      {pendingInvites} دعوت
-                    </span>
-                  </div>
-                </div>
+              <div className="payment-cell row between">
+                <span className="text-muted">دعوت‌های در انتظار:</span>
+                <strong
+                  className={
+                    hasPendingInvites ? "text-danger" : "text-success"
+                  }
+                >
+                  {pendingInvites} دعوت
+                </strong>
               </div>
 
               {!canSubmit && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-red-400 text-sm mb-1">
-                        شرایط لازم رعایت نشده است
-                      </h4>
-                      <p className="text-xs text-red-300">
-                        برای ادامه، لطفاً شرایط لازم را برطرف کنید.
-                      </p>
-                    </div>
+                <div className="alert alert-danger">
+                  <span className="alert-icon" aria-hidden="true">
+                    <AlertTriangle className="icon icon-sm" />
+                  </span>
+                  <div>
+                    <p className="alert-title">شرایط لازم رعایت نشده است</p>
+                    <p>برای ادامه، لطفاً شرایط لازم را برطرف کنید.</p>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="flex gap-3">
-              <Button
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn btn-ghost flex-1"
                 onClick={handleClose}
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white"
               >
                 انصراف
-              </Button>
-              <Button
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary flex-1"
                 onClick={handleNextStep}
-                className="flex-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
               >
                 بررسی شرایط
-                <ChevronRight className="w-4 h-4 mr-2" />
-              </Button>
+                <ChevronRight className="icon-sm" aria-hidden="true" />
+              </button>
             </div>
           </>
         );
@@ -240,95 +224,92 @@ const SubmitTeamModal = ({
       case 2:
         return (
           <>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-yellow-400" />
-              </div>
+            <div className="row">
+              <span className="stat-icon is-yellow" aria-hidden="true">
+                <AlertTriangle className="icon" />
+              </span>
               <div>
-                <h3 className="text-lg font-bold">بررسی شرایط</h3>
-                <p className="text-sm text-gray-400">مرحله ۲ از ۳</p>
+                <h3 className="card-title">بررسی شرایط</h3>
+                <p className="small text-muted">مرحله ۲ از ۳</p>
               </div>
             </div>
 
-            <div className="space-y-4 mb-6">
-              <p className="text-gray-300 text-sm">
+            <div className="stack">
+              <p className="card-text">
                 قبل از ثبت نهایی، لطفاً شرایط زیر را بررسی کنید:
               </p>
 
-              <div className="space-y-3">
-                {requirements.map((req, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center justify-between p-3 rounded-lg border ${
-                      req.condition
-                        ? "bg-green-500/10 border-green-500/30"
-                        : "bg-red-500/10 border-red-500/30"
+              {requirements.map((req, index) => (
+                <div className="payment-cell row between" key={index}>
+                  <span className="row">
+                    {req.condition ? (
+                      <CheckCircle
+                        className="icon-sm text-success"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <X className="icon-sm text-danger" aria-hidden="true" />
+                    )}
+                    <span className="small">{req.text}</span>
+                  </span>
+                  <span
+                    className={`small ${
+                      req.condition ? "text-success" : "text-danger"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      {req.condition ? (
-                        <CheckCircle className="w-4 h-4 text-green-400" />
-                      ) : (
-                        <X className="w-4 h-4 text-red-400" />
-                      )}
-                      <span className="text-sm">{req.text}</span>
-                    </div>
-                    <span
-                      className={`text-sm font-medium ${
-                        req.condition ? "text-green-400" : "text-red-400"
-                      }`}
-                    >
-                      {req.current}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                    {req.current}
+                  </span>
+                </div>
+              ))}
 
               {!canSubmit && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-                  <h4 className="font-bold text-red-400 text-sm mb-2">
-                    اقدامات لازم:
-                  </h4>
-                  <ul className="text-xs text-red-300 space-y-1">
-                    {hasPendingInvites && (
-                      <li>• دعوت‌نامه‌های در انتظار را مدیریت کنید</li>
-                    )}
-                    {!hasMinMembers && (
-                      <li>• تعداد اعضای تیم را به حداقل ۳ نفر برسانید</li>
-                    )}
-                    {teamStatus !== "draft" && (
-                      <li>• تیم باید در حالت پیش‌نویس باشد</li>
-                    )}
-                  </ul>
+                <div className="alert alert-danger">
+                  <span className="alert-icon" aria-hidden="true">
+                    <AlertTriangle className="icon icon-sm" />
+                  </span>
+                  <div>
+                    <p className="alert-title">اقدامات لازم:</p>
+                    <ul className="small">
+                      {hasPendingInvites && (
+                        <li>• دعوت‌نامه‌های در انتظار را مدیریت کنید</li>
+                      )}
+                      {!hasMinMembers && (
+                        <li>• تعداد اعضای تیم را به حداقل ۳ نفر برسانید</li>
+                      )}
+                      {teamStatus !== "draft" && (
+                        <li>• تیم باید در حالت پیش‌نویس باشد</li>
+                      )}
+                    </ul>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="flex gap-3">
-              <Button
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn btn-ghost flex-1"
                 onClick={handlePrevStep}
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white"
               >
                 بازگشت
-              </Button>
-              <Button
+              </button>
+              <button
+                type="button"
+                className={`btn flex-1 ${
+                  canSubmit ? "btn-success" : "btn-secondary"
+                }`}
                 onClick={handleNextStep}
                 disabled={!canSubmit}
-                className={`flex-1 ${
-                  canSubmit
-                    ? "bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30"
-                    : "bg-gray-500/20 text-gray-400 border border-gray-500/30"
-                } disabled:opacity-50`}
               >
                 {canSubmit ? (
                   <>
                     ادامه به تأیید نهایی
-                    <ChevronRight className="w-4 h-4 mr-2" />
+                    <ChevronRight className="icon-sm" aria-hidden="true" />
                   </>
                 ) : (
                   "شرایط رعایت نشده"
                 )}
-              </Button>
+              </button>
             </div>
           </>
         );
@@ -336,116 +317,103 @@ const SubmitTeamModal = ({
       case 3:
         return (
           <>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-purple-400" />
-              </div>
+            <div className="row">
+              <span className="stat-icon is-green" aria-hidden="true">
+                <CheckCircle className="icon" />
+              </span>
               <div>
-                <h3 className="text-lg font-bold">تأیید نهایی</h3>
-                <p className="text-sm text-gray-400">مرحله ۳ از ۳</p>
+                <h3 className="card-title">تأیید نهایی</h3>
+                <p className="small text-muted">مرحله ۳ از ۳</p>
               </div>
             </div>
 
             {submitResult ? (
-              <div className="space-y-4 mb-6">
+              <div className="stack">
                 <div
-                  className={`p-4 rounded-lg border ${
-                    submitResult.success
-                      ? "bg-green-500/10 border-green-500/30"
-                      : "bg-red-500/10 border-red-500/30"
+                  className={`alert ${
+                    submitResult.success ? "alert-success" : "alert-danger"
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <span className="alert-icon" aria-hidden="true">
                     {submitResult.success ? (
-                      <CheckCircle className="w-6 h-6 text-green-400 mt-0.5" />
+                      <CheckCircle className="icon icon-sm" />
                     ) : (
-                      <X className="w-6 h-6 text-red-400 mt-0.5" />
+                      <X className="icon icon-sm" />
                     )}
-                    <div>
-                      <h4
-                        className={`font-bold mb-2 ${
-                          submitResult.success
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        {submitResult.success ? "عملیات موفق" : "عملیات ناموفق"}
-                      </h4>
-                      <p className="text-sm text-gray-300">
-                        {submitResult.message}
-                      </p>
-                    </div>
+                  </span>
+                  <div>
+                    <p className="alert-title">
+                      {submitResult.success ? "عملیات موفق" : "عملیات ناموفق"}
+                    </p>
+                    <p>{submitResult.message}</p>
                   </div>
                 </div>
 
-                <Button
+                <button
+                  type="button"
+                  className="btn btn-primary w-full"
                   onClick={handleClose}
-                  className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
                 >
                   {submitResult.success ? "متوجه شدم" : "تلاش مجدد"}
-                </Button>
+                </button>
               </div>
             ) : (
               <>
-                <div className="space-y-4 mb-6">
-                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <AlertTriangle className="w-5 h-5 text-yellow-400 mt-0.5" />
-                      <div>
-                        <h4 className="font-bold text-yellow-400 text-sm mb-1">
-                          هشدار مهم!
-                        </h4>
-                        <ul className="text-xs text-yellow-300 space-y-1">
-                          <li>
-                            • پس از ثبت نهایی، امکان ویرایش تیم وجود نخواهد داشت
-                          </li>
-                          <li>• امکان دعوت عضو جدید غیرفعال می‌شود</li>
-                          <li>• این عمل غیرقابل بازگشت است</li>
-                          <li>
-                            • اطلاعات تیم برای بررسی به ادمین‌ها ارسال می‌شود
-                          </li>
-                        </ul>
-                      </div>
+                <div className="stack">
+                  <div className="alert alert-warning">
+                    <span className="alert-icon" aria-hidden="true">
+                      <AlertTriangle className="icon icon-sm" />
+                    </span>
+                    <div>
+                      <p className="alert-title">هشدار مهم!</p>
+                      <ul className="small">
+                        <li>
+                          • پس از ثبت نهایی، امکان ویرایش تیم وجود نخواهد داشت
+                        </li>
+                        <li>• امکان دعوت عضو جدید غیرفعال می‌شود</li>
+                        <li>• این عمل غیرقابل بازگشت است</li>
+                        <li>
+                          • اطلاعات تیم برای بررسی به ادمین‌ها ارسال می‌شود
+                        </li>
+                      </ul>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-[#FFD500]/10 to-transparent border border-[#FFD500]/20 rounded-lg p-4">
-                    <div className="text-center">
-                      <p className="text-sm text-gray-300 mb-2">
-                        آیا مطمئن هستید که می‌خواهید تیم زیر را ثبت نهایی کنید؟
-                      </p>
-                      <h4 className="text-lg font-bold text-[#FFD500]">
-                        {teamName}
-                      </h4>
-                    </div>
+                  <div className="card text-center">
+                    <p className="card-text">
+                      آیا مطمئن هستید که می‌خواهید تیم زیر را ثبت نهایی کنید؟
+                    </p>
+                    <h4 className="card-title">{teamName}</h4>
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <Button
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="btn btn-ghost flex-1"
                     onClick={handlePrevStep}
                     disabled={submitting}
-                    className="flex-1 bg-white/10 hover:bg-white/20 text-white disabled:opacity-50"
                   >
                     بازگشت
-                  </Button>
-                  <Button
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-success flex-1"
                     onClick={handleFinalSubmit}
                     disabled={submitting}
-                    className="flex-1 bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 text-green-400 border border-green-500/30 disabled:opacity-50"
                   >
                     {submitting ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin ml-2" />
+                        <span className="spinner" aria-hidden="true" />
                         در حال ثبت نهایی...
                       </>
                     ) : (
                       <>
-                        <CheckCircle className="w-5 h-5 ml-2" />
+                        <CheckCircle className="icon-sm" aria-hidden="true" />
                         ثبت نهایی تیم
                       </>
                     )}
-                  </Button>
+                  </button>
                 </div>
               </>
             )}
@@ -458,9 +426,11 @@ const SubmitTeamModal = ({
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      maxWidth="max-w-md"
       showCloseButton={!submitting && !submitResult}
       closeOnOverlayClick={!submitting}
+      showHeader
+      title="ثبت نهایی تیم"
+      icon={<CheckCircle className="icon" />}
     >
       {renderStepIndicator()}
       {renderStepContent()}
