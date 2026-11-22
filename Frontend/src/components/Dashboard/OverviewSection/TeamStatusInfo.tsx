@@ -1,4 +1,5 @@
 // src/pages/Dashboard/components/OverviewSection/TeamStatusInfo.tsx
+import { USE_MOCKS } from "@/services/mock/flags";
 import type { LucideIcon } from "lucide-react";
 import {
   AlertCircle,
@@ -43,7 +44,9 @@ const statusConfig: Record<string, StatusConfig> = {
       "اعضای تیم را دعوت کنید (حداقل ۳ نفر)",
       "منتظر بمانید تا اعضای دعوت شده invitation را قبول کنند",
       "پس از تکمیل اعضا، روی دکمه 'ثبت نهایی تیم' کلیک کنید",
-      "پس از ثبت نهایی، منتظر تایید از سمت ادمین‌ها باشید سپس هزینه ثبت‌نام را پرداخت و فیش را آپلود کنید",
+      USE_MOCKS
+        ? "پس از تایید مدیر، کاپیتان می‌تواند فیش نمونه را ثبت کند"
+        : "پس از ثبت نهایی، منتظر تایید از سمت ادمین‌ها باشید سپس هزینه ثبت‌نام را پرداخت و فیش را آپلود کنید",
     ],
     note: "💡 توجه: تا زمانی که تیم در حالت پیش‌نویس است، امکان ویرایش اطلاعات تیم وجود دارد. پس از ثبت نهایی، ویرایش امکان‌پذیر نخواهد بود.",
   },
@@ -57,7 +60,9 @@ const statusConfig: Record<string, StatusConfig> = {
     steps: [
       "تیم شما برای بررسی به ادمین‌ها ارسال شده است",
       "لطفاً منتظر تایید نهایی از سوی ادمین‌ها باشید",
-      "پس از تایید ادمین‌ها، می‌توانید هزینه ثبت‌نام را پرداخت کنید",
+      USE_MOCKS
+        ? "پس از تایید مدیر، کاپیتان می‌تواند فیش نمونه را ثبت کند"
+        : "پس از تایید ادمین‌ها، می‌توانید هزینه ثبت‌نام را پرداخت کنید",
     ],
     note: "⏳ زمان بررسی معمولاً ۲۴ تا ۴۸ ساعت طول می‌کشد",
   },
@@ -68,7 +73,9 @@ const statusConfig: Record<string, StatusConfig> = {
     alert: "alert-warning",
     description:
       "تیم شما توسط ادمین‌ها تایید شده است. لطفاً برای تکمیل ثبت‌نام:",
-    steps: [
+    steps: USE_MOCKS ? [
+      "کاپیتان تیم یک فیش نمونه برای بررسی مدیر ثبت می‌کند",
+    ] : [
       "هزینه ثبت‌نام را به شماره کارت مشخص شده واریز کنید",
       "پس از واریز، فیش پرداختی را در سیستم آپلود کنید",
       "پس از آپلود فیش، وضعیت شما به 'در انتظار تایید فیش' تغییر خواهد کرد",
@@ -122,7 +129,7 @@ const TeamStatusInfo = ({ teamData, formatPrice }: TeamStatusInfoProps) => {
     : statusConfig.draft;
   const Icon = config.icon;
   const note =
-    teamData.status === "waiting_for_payment"
+    !USE_MOCKS && teamData.status === "waiting_for_payment"
       ? `💰 مبلغ قابل پرداخت: ${formatPrice(660000)}`
       : config.note;
 

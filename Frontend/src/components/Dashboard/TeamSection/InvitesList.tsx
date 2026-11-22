@@ -1,5 +1,7 @@
 // src/pages/Dashboard/components/TeamSection/InvitesList.tsx
 import { Bell, Clock, X } from "lucide-react";
+import { USE_MOCKS } from "@/services/mock/flags";
+import { toast } from "sonner";
 import LoadingSpinner from "../Common/LoadingSpinner";
 
 interface Invite {
@@ -37,6 +39,17 @@ const InvitesList = ({
   if (!invites || invites.length === 0) {
     return null;
   }
+
+  const copyInviteLink = async (token: string) => {
+    const link = new URL("/accept-invite", window.location.origin);
+    link.searchParams.set("token", token);
+    try {
+      await navigator.clipboard.writeText(link.href);
+      toast.success("لینک دعوت کپی شد");
+    } catch {
+      toast.error("کپی لینک دعوت امکان‌پذیر نیست");
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fa-IR");
@@ -78,6 +91,11 @@ const InvitesList = ({
                 <span className="dot" aria-hidden="true" />
                 در انتظار پاسخ
               </span>
+              {USE_MOCKS && isCaptain && (
+                <button type="button" className="btn btn-secondary" onClick={() => copyInviteLink(invite.token)}>
+                  کپی لینک دعوت
+                </button>
+              )}
               <button
                 type="button"
                 className="btn btn-destructive"

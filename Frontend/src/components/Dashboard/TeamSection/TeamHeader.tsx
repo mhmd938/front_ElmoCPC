@@ -1,5 +1,6 @@
 // src/pages/Dashboard/components/TeamSection/TeamHeader.tsx
 import { Plus, CheckCircle, Upload, Trash2, AlertCircle } from "lucide-react";
+import { USE_MOCKS } from "@/services/mock/flags";
 import StatusBadge from "../Common/StatusBadge";
 
 interface TeamHeaderProps {
@@ -28,8 +29,8 @@ const TeamHeader = ({
   onSubmitTeam,
 }: TeamHeaderProps) => {
   const canInvite =
-    (!invites || invites.length < 3) &&
-    (teamData.status === "draft" || !teamData);
+    teamData.status === "draft" &&
+    invites.length + (USE_MOCKS ? teamData.members?.length ?? 0 : 0) < 3;
 
   return (
     <div className="card team-head">

@@ -1,5 +1,7 @@
 // src/pages/Dashboard/components/OverviewSection/PaymentInfoSection.tsx
 import { Receipt, Upload } from "lucide-react";
+import { USE_MOCKS } from "@/services/mock/flags";
+import MockPaymentInstructions from "../Common/MockPaymentInstructions";
 
 interface PaymentInfoSectionProps {
   paymentInfo?: {
@@ -27,25 +29,29 @@ const PaymentInfoSection = ({
         </h2>
       </div>
 
-      <div className="payment-grid">
-        <div className="payment-cell">
-          <p className="payment-label">مبلغ قابل پرداخت</p>
-          <p className="payment-amount">
-            {paymentInfo?.ticketPrice != null ? formatPrice(paymentInfo.ticketPrice) : "—"}
-          </p>
-        </div>
-        <div className="payment-cell">
-          <p className="payment-label">شماره کارت</p>
-          <p className="payment-number" dir="ltr">
-            {paymentInfo?.cardNumber || "—"}
-          </p>
-          <p className="payment-bank">{paymentInfo?.bankName}</p>
-        </div>
-      </div>
+      {USE_MOCKS ? <MockPaymentInstructions /> : (
+        <>
+          <div className="payment-grid">
+            <div className="payment-cell">
+              <p className="payment-label">مبلغ قابل پرداخت</p>
+              <p className="payment-amount">
+                {paymentInfo?.ticketPrice != null ? formatPrice(paymentInfo.ticketPrice) : "—"}
+              </p>
+            </div>
+            <div className="payment-cell">
+              <p className="payment-label">شماره کارت</p>
+              <p className="payment-number" dir="ltr">
+                {paymentInfo?.cardNumber || "—"}
+              </p>
+              <p className="payment-bank">{paymentInfo?.bankName}</p>
+            </div>
+          </div>
 
-      <p className="payment-hint">
-        لطفا پس از واریز مبلغ، فیش پرداخت را آپلود کنید.
-      </p>
+          <p className="payment-hint">
+            لطفا پس از واریز مبلغ، فیش پرداخت را آپلود کنید.
+          </p>
+        </>
+      )}
 
       <div>
         <button type="button" className="btn btn-secondary" onClick={onUploadReceipt}>

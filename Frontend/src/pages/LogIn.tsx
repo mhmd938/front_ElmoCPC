@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { Formik, Form, Field, type FieldProps } from "formik";
 import * as Yup from "yup";
@@ -20,8 +20,9 @@ import type {
   VerifyOtpErrorResponse,
 } from "@/types/authTypes";
 
-// 🆕 استور احراز هویت
-import useUserStore from "@/store/userStore/userStore";
+import { saveSession } from "@/services/authSession";
+import { USE_MOCKS } from "@/services/mock/flags";
+import { isMockAdmin } from "@/services/mock/mockData";
 
 // Validation schema برای ایمیل
 const emailValidationSchema = Yup.object({
@@ -48,13 +49,13 @@ interface EmailFormValues {
 
 function Login() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const invite = USE_MOCKS ? params.get("invite") : null;
+  const inviteQuery = invite ? `?invite=${encodeURIComponent(invite)}` : "";
   const [step, setStep] = useState<"email" | "otp">("email");
   const [userEmail, setUserEmail] = useState("");
   const [otpValue, setOtpValue] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
-
-  // 🆕 از استور: بعد از verify OTP اینو صدا می‌زنیم
-  const { setAuth } = useUserStore();
 
   // مرحله ۱: ارسال ایمیل برای دریافت OTP
   const handleEmailSubmit = async (values: EmailFormValues) => {
@@ -106,17 +107,17 @@ function Login() {
 
       console.log("verify login otp response:", res);
 
-      // 🆕 به‌جای localStorage، مستقیم استور رو ست می‌کنیم
-      setAuth(res.data);
-
-      localStorage.setItem("access_token", res.data.access_token);
-      localStorage.setItem("refresh_token", res.data.refresh_token);
+      saveSession(res.data);
 
       toast.success("ورود با موفقیت انجام شد!");
 
-      // 🆕 بررسی اگر ایمیل ادمین باشه، به صفحه ادمین برو
+      if (invite) {
+        navigate(`/accept-invite?token=${encodeURIComponent(invite)}`);
+        return;
+      }
+
       const adminEmail = "kianyarii1383@gmail.com";
-      if (userEmail === adminEmail) {
+      if (USE_MOCKS ? isMockAdmin(res.data) : userEmail === adminEmail) {
         console.log("Admin login detected, redirecting to admin panel");
         navigate("/admin");
       } else {
@@ -148,8 +149,7 @@ function Login() {
     try {
       if (!userEmail) return;
 
-      // اینجا می‌توانی API ارسال مجدد OTP برای لاگین را صدا بزنی
-      // await resendLoginOTP(userEmail);
+      if (USE_MOCKS) await loginService({ email: userEmail });
 
       console.log("Resending OTP to:", userEmail);
       toast.success("کد تایید دوباره ارسال شد!");
@@ -239,7 +239,7 @@ function Login() {
 
             <p className="form-foot">
               حساب کاربری ندارید؟{" "}
-              <Link className="link" to="/signup">
+              <Link className="link" to={`/signup${inviteQuery}`}>
                 ثبت‌نام کنید
               </Link>
             </p>

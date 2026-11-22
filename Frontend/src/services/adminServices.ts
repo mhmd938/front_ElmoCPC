@@ -1,4 +1,13 @@
 import { getData, postData } from "./services";
+import { USE_MOCKS } from "./mock/flags";
+import {
+  verifyReceiptService as mockVerifyReceipt,
+  fetchPendingReceiptsService as mockFetchPendingReceipts,
+  fetchTeamsService as mockFetchTeams,
+  approveTeamService as mockApproveTeam,
+  rejectTeamService as mockRejectTeam,
+  fetchUsersService as mockFetchUsers,
+} from "./mock/mockAdmin";
 
 export interface TeamMember {
   id: number;
@@ -27,6 +36,7 @@ export const verifyReceiptService = async (
   approved: boolean,
   notes?: string
 ): Promise<void> => {
+  if (USE_MOCKS) return mockVerifyReceipt(receiptId, approved, notes);
   return postData({
     endPoint: `/v1/admin/receipts/${receiptId}/verify`, // از receiptId استفاده میشه
     data: {
@@ -49,6 +59,7 @@ export type Receipt = {
 
 // تابع جدید برای دریافت pending receipts
 export const fetchPendingReceiptsService = async (): Promise<Receipt[]> => {
+  if (USE_MOCKS) return mockFetchPendingReceipts();
   const accessToken = localStorage.getItem("access_token");
   if (!accessToken) {
     throw new Error("No access token found");
@@ -75,6 +86,7 @@ export const fetchPendingReceiptsService = async (): Promise<Receipt[]> => {
    GET ALL TEAMS - دریافت لیست تیم‌ها
 ----------------------------------------- */
 export const fetchTeamsService = async (): Promise<Team[]> => {
+  if (USE_MOCKS) return mockFetchTeams();
   try {
     const response = await getData({
       endPoint: "/v1/admin/teams",
@@ -112,6 +124,7 @@ export const fetchTeamsService = async (): Promise<Team[]> => {
    APPROVE TEAM - تایید تیم
 ----------------------------------------- */
 export const approveTeamService = async (teamId: number): Promise<void> => {
+  if (USE_MOCKS) return mockApproveTeam(teamId);
   return postData({
     endPoint: `/v1/admin/teams/${teamId}/validate`,
     data: {},
@@ -122,6 +135,7 @@ export const approveTeamService = async (teamId: number): Promise<void> => {
    REJECT TEAM - رد تیم
 ----------------------------------------- */
 export const rejectTeamService = async (teamId: number): Promise<void> => {
+  if (USE_MOCKS) return mockRejectTeam(teamId);
   return postData({
     endPoint: `/v1/admin/teams/${teamId}/reject`,
     data: {},
@@ -149,6 +163,7 @@ export type User = {
 
 // اضافه کردن تابع fetchUsersService
 export const fetchUsersService = async (): Promise<User[]> => {
+  if (USE_MOCKS) return mockFetchUsers();
   try {
     const response = await getData({
       endPoint: "/v1/admin/users", // ← اگر اندپوینت واقعی users است

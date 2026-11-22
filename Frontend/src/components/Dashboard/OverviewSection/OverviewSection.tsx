@@ -5,6 +5,7 @@ import TeamStatusInfo from "./TeamStatusInfo";
 import NotificationsList from "./NotificationsList.tsx";
 import PaymentInfoSection from "./PaymentInfoSection.tsx";
 import { getUserRegistrationStatus } from "@/services/teamService";
+import { USE_MOCKS } from "@/services/mock/flags";
 
 interface OverviewSectionProps {
   userData: any;
@@ -23,7 +24,7 @@ interface OverviewSectionProps {
 const OverviewSection = ({
   userData,
   teamData,
-  // isCaptain,
+  isCaptain,
   daysLeft,
   notifications,
   onUploadReceipt,
@@ -45,11 +46,13 @@ const OverviewSection = ({
         registrationStatus={getUserRegistrationStatus(teamData)}
       />
 
-      <PaymentInfoSection
-        paymentInfo={paymentInfo}
-        formatPrice={formatPrice}
-        onUploadReceipt={onUploadReceipt}
-      />
+      {(!USE_MOCKS || (isCaptain && teamData?.status === "waiting_for_payment")) && (
+        <PaymentInfoSection
+          paymentInfo={paymentInfo}
+          formatPrice={formatPrice}
+          onUploadReceipt={onUploadReceipt}
+        />
+      )}
 
       <TeamStatusInfo teamData={teamData} formatPrice={formatPrice} />
 

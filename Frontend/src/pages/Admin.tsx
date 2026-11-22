@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { clearSession, getAccessToken } from "@/services/authSession";
+import { isMockAdmin } from "@/services/mock/mockData";
+import { USE_MOCKS } from "@/services/mock/flags";
+import useUserStore from "@/store/userStore/userStore";
 import {
   Search,
   CheckCircle,
@@ -102,7 +106,7 @@ function AdminTeamsApproval() {
       setLoading(true);
       setError(null);
 
-      const accessToken = localStorage.getItem("access_token");
+      const accessToken = getAccessToken();
       if (!accessToken) {
         navigate("/login");
         return;
@@ -179,7 +183,7 @@ function AdminTeamsApproval() {
       setUsersLoading(true);
       setError(null);
 
-      const accessToken = localStorage.getItem("access_token");
+      const accessToken = getAccessToken();
       if (!accessToken) {
         navigate("/login");
         return;
@@ -211,11 +215,15 @@ function AdminTeamsApproval() {
       setApproving(teamId);
       await approveTeamService(teamId);
       toast.success("تیم با موفقیت تایید شد");
-      setTeams((prev) =>
-        prev.map((team) =>
-          team.id === teamId ? { ...team, status: "accepted" } : team
-        )
-      );
+      if (USE_MOCKS) {
+        await fetchTeams();
+      } else {
+        setTeams((prev) =>
+          prev.map((team) =>
+            team.id === teamId ? { ...team, status: "accepted" } : team
+          )
+        );
+      }
       setSelectedTeam(null);
     } catch (err: any) {
       console.error("Error:", err);
@@ -245,8 +253,7 @@ function AdminTeamsApproval() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+    clearSession();
     navigate("/login");
   };
 
@@ -1039,4 +1046,11 @@ function AdminTeamsApproval() {
   );
 }
 
-export default AdminTeamsApproval;
+export default function Admin() {
+  const authUser = useUserStore(state => state.authUser);
+  if (USE_MOCKS) {
+    if (!authUser || !getAccessToken()) return <Navigate to="/login" replace />;
+    if (!isMockAdmin(authUser)) return <Navigate to="/dashboard" replace />;
+  }
+  return <AdminTeamsApproval />;
+}

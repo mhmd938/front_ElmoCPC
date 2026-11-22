@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { Navigate, useSearchParams, useNavigate } from "react-router-dom";
+import { USE_MOCKS } from "@/services/mock/flags";
+import { getAccessToken } from "@/services/authSession";
 import { AlertCircle, Users } from "lucide-react";
 import { toast } from "sonner";
 import ELMOCPC from "@/assets/ELMOCPC.svg";
@@ -23,10 +25,6 @@ function AcceptTeamInvite() {
         toast.error("توکن دعوت یافت نشد");
         return;
       }
-
-      // if (!checkAuthentication()) {
-      //   return;
-      // }
 
       setLoading(true);
       setError(null);
@@ -72,10 +70,6 @@ function AcceptTeamInvite() {
         return;
       }
 
-      // if (!checkAuthentication()) {
-      //   return;
-      // }
-
       setLoading(true);
       setError(null);
 
@@ -84,7 +78,7 @@ function AcceptTeamInvite() {
       toast.success("دعوت رد شد");
 
       setTimeout(() => {
-        navigate("/login");
+        navigate(USE_MOCKS ? "/dashboard" : "/login");
       }, 1500);
     } catch (err: any) {
       console.error("Error rejecting team invite:", err);
@@ -115,19 +109,9 @@ function AcceptTeamInvite() {
     }
   };
 
-  // const checkAuthentication = () => {
-  //   const accessToken = localStorage.getItem("access_token");
-  //   if (!accessToken) {
-  //     toast.error("لطفا ابتدا وارد حساب کاربری خود شوید");
-  //     navigate("/login", {
-  //       state: {
-  //         redirectTo: `/accept-invite?token=${token}`,
-  //       },
-  //     });
-  //     return false;
-  //   }
-  //   return true;
-  // };
+  if (USE_MOCKS && token && !getAccessToken()) {
+    return <Navigate replace to={`/login?invite=${encodeURIComponent(token)}`} />;
+  }
 
   if (!token) {
     return (

@@ -2,7 +2,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { createTeamService, inviteUserService } from "@/services/teamService";
+import { createTeamService, getTeamService, inviteUserService, updateTeamService } from "@/services/teamService";
+import useUserStore from "@/store/userStore/userStore";
+import { USE_MOCKS } from "@/services/mock/flags";
+import { clearWizardDraft, getAccessToken, getWizardStorageKey } from "@/services/authSession";
 import type { CreateTeamPayload, InviteUserPayload } from "@/types/teamTypes";
 
 interface TeamInfo {
@@ -51,33 +54,58 @@ export const useTeamRegistration = (
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load from localStorage on mount
+  const [restoring, setRestoring] = useState(USE_MOCKS);
+
   useEffect(() => {
-    const savedTeamId = localStorage.getItem("teamId");
-    const savedTeamInfo = localStorage.getItem("teamInfo");
-    const savedMember1 = localStorage.getItem("member1");
-    const savedMember2 = localStorage.getItem("member2");
+    let active = true;
+    const read = (field: string) => localStorage.getItem(getWizardStorageKey(field));
+    async function restore() {
+      const savedId = read("teamId");
+      if (USE_MOCKS) {
+        if (!savedId || !getAccessToken()) {
+          clearWizardDraft();
+          return;
+        }
+        const team = await getTeamService();
+        if (!active) return;
+        if (String(team.id) !== savedId || team.status !== "draft" ||
+          team.creator_id !== useUserStore.getState().authUser?.id) {
+          clearWizardDraft();
+          return;
+        }
+        const step = Number(read("currentStep") ?? 1);
+        setCurrentStep(Number.isInteger(step) && step >= 0 && step <= 3 ? step : 1);
+        setTeamInfo({ teamName: team.name, teamDescription: team.description });
+      } else {
+        const info = read("teamInfo");
+        if (info) setTeamInfo(JSON.parse(info));
+      }
+      const first = read("member1");
+      const second = read("member2");
+      if (savedId) setTeamId(Number(savedId));
+      if (first) setMember1(JSON.parse(first));
+      if (second) setMember2(JSON.parse(second));
+    }
+    restore().catch(() => { if (active && USE_MOCKS) clearWizardDraft(); })
+      .finally(() => { if (active) setRestoring(false); });
+    return () => { active = false; };
+  }, [setCurrentStep]);
 
-    if (savedTeamId) setTeamId(Number(savedTeamId));
-    if (savedTeamInfo) setTeamInfo(JSON.parse(savedTeamInfo));
-    if (savedMember1) setMember1(JSON.parse(savedMember1));
-    if (savedMember2) setMember2(JSON.parse(savedMember2));
-  }, []);
-
-  // Save current step to localStorage
   useEffect(() => {
-    localStorage.setItem("currentStep", currentStep.toString());
-  }, [currentStep]);
+    if (!USE_MOCKS || (!restoring && teamId)) {
+      localStorage.setItem(getWizardStorageKey("currentStep"), currentStep.toString());
+    }
+  }, [currentStep, restoring, teamId]);
 
-  const saveToLocalStorage = useCallback((key: string, data: any) => {
-    localStorage.setItem(key, JSON.stringify(data));
+  const saveToLocalStorage = useCallback((key: string, data: unknown) => {
+    localStorage.setItem(getWizardStorageKey(key), JSON.stringify(data));
   }, []);
 
   const handleCreateTeam = useCallback(async (values: TeamInfo) => {
     try {
       setIsSubmitting(true);
 
-      const token = localStorage.getItem("access_token");
+      const token = getAccessToken();
       if (!token) {
         toast.error("توکن یافت نشد. لطفا دوباره وارد شوید.");
         navigate("/login");
@@ -89,17 +117,13 @@ export const useTeamRegistration = (
         description: values.teamDescription,
       };
 
-      console.log("📋 Creating team with payload:", teamPayload);
-      const response = await createTeamService(teamPayload);
-
-      if (response?.data?.id) {
-        const teamId = response.data.id;
-        console.log("✅ Team created with ID:", teamId);
-        
-        saveToLocalStorage("teamId", teamId);
+      const team = USE_MOCKS && teamId
+        ? await updateTeamService(String(teamId), teamPayload)
+        : (await createTeamService(teamPayload)).data;
+      if (team?.id) {
+        saveToLocalStorage("teamId", team.id);
         saveToLocalStorage("teamInfo", values);
-
-        setTeamId(teamId);
+        setTeamId(team.id);
         toast.success("تیم با موفقیت ایجاد شد!");
         setCurrentStep(1);
       } else {
@@ -123,7 +147,7 @@ export const useTeamRegistration = (
     } finally {
       setIsSubmitting(false);
     }
-  }, [navigate, saveToLocalStorage, setCurrentStep]);
+  }, [navigate, saveToLocalStorage, setCurrentStep, teamId]);
 
   const handleMember1Submit = useCallback((values: MemberData) => {
     saveToLocalStorage("member1", values);
@@ -188,10 +212,13 @@ export const useTeamRegistration = (
         "اعضا دعوت شدند. پس از تایید اعضا نسبت به نهایی کردن تیم اقدام کنید"
       );
 
-      // Clear member data from localStorage
-      localStorage.removeItem("member1");
-      localStorage.removeItem("member2");
-      localStorage.removeItem("currentStep");
+      if (USE_MOCKS) {
+        clearWizardDraft();
+      } else {
+        localStorage.removeItem(getWizardStorageKey("member1"));
+        localStorage.removeItem(getWizardStorageKey("member2"));
+        localStorage.removeItem(getWizardStorageKey("currentStep"));
+      }
 
       setTimeout(() => {
         navigate("/dashboard");
@@ -234,6 +261,7 @@ export const useTeamRegistration = (
     member1,
     member2,
     isSubmitting,
+    restoring,
     handleCreateTeam,
     handleMember1Submit,
     handleMember2Submit,

@@ -19,6 +19,7 @@ function TeamRegistration() {
     member1,
     member2,
     isSubmitting,
+    restoring,
     handleCreateTeam,
     handleMember1Submit,
     handleMember2Submit,
@@ -54,7 +55,7 @@ function TeamRegistration() {
             initialValues={teamInfo}
             onSubmit={(values) => {
               updateTeamInfo(values);
-              handleCreateTeam(values);
+              return handleCreateTeam(values);
             }}
             isSubmitting={isSubmitting}
           />
@@ -120,7 +121,7 @@ function TeamRegistration() {
           key={currentStep}
           aria-labelledby="buildteam-title"
         >
-          {renderStep()}
+          {restoring ? <p role="status">در حال بارگذاری اطلاعات تیم...</p> : renderStep()}
         </section>
       </div>
 

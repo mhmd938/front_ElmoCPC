@@ -2,6 +2,8 @@
 import { useState, useCallback } from "react";
 import { Upload, Receipt } from "lucide-react";
 import BaseModal from "./BaseModal.tsx";
+import { USE_MOCKS } from "@/services/mock/flags";
+import MockPaymentInstructions from "../Common/MockPaymentInstructions";
 
 interface UploadReceiptModalProps {
   isOpen: boolean;
@@ -98,21 +100,23 @@ const UploadReceiptModal = ({
         </>
       }
     >
-      <div className="payment-grid">
-        <div className="payment-cell">
-          <p className="payment-label">مبلغ قابل پرداخت</p>
-          <p className="payment-amount">
-            {formatPrice(paymentInfo.ticketPrice)}
-          </p>
+      {USE_MOCKS ? <MockPaymentInstructions /> : (
+        <div className="payment-grid">
+          <div className="payment-cell">
+            <p className="payment-label">مبلغ قابل پرداخت</p>
+            <p className="payment-amount">
+              {formatPrice(paymentInfo.ticketPrice)}
+            </p>
+          </div>
+          <div className="payment-cell">
+            <p className="payment-label">شماره کارت</p>
+            <p className="payment-number" dir="ltr">
+              {paymentInfo.cardNumber}
+            </p>
+            <p className="payment-bank">{paymentInfo.bankName}</p>
+          </div>
         </div>
-        <div className="payment-cell">
-          <p className="payment-label">شماره کارت</p>
-          <p className="payment-number" dir="ltr">
-            {paymentInfo.cardNumber}
-          </p>
-          <p className="payment-bank">{paymentInfo.bankName}</p>
-        </div>
-      </div>
+      )}
 
       <div
         onDragEnter={(event) => {

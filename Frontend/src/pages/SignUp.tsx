@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import {
   Formik,
@@ -24,7 +24,8 @@ import type {
   VerifyOtpErrorResponse,
 } from "@/types/authTypes";
 import { toast } from "sonner";
-import useUserStore from "../store/userStore/userStore";
+import { saveSession } from "@/services/authSession";
+import { USE_MOCKS } from "@/services/mock/flags";
 
 // Validation schema برای فرم ثبت نام
 const validationSchema = Yup.object({
@@ -78,24 +79,15 @@ interface SignUpFormValues {
   university: string;
 }
 
-interface UserData {
-  name: string;
-  familyName: string;
-  email: string;
-  phone: string;
-  national_code: string;
-  tshirt_size: string;
-  university: string;
-}
-
 function SignUp() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const invite = USE_MOCKS ? params.get("invite") : null;
+  const inviteQuery = invite ? `?invite=${encodeURIComponent(invite)}` : "";
   const [step, setStep] = useState<"form" | "otp">("form");
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<RegisterPayload | null>(null);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpValue, setOtpValue] = useState("");
-
-  const { setAuth } = useUserStore();
 
   // مرحله ۱: ارسال فرم و درخواست OTP
   const handleSubmit = async (
@@ -103,9 +95,9 @@ function SignUp() {
     { setSubmitting, setFieldError }: FormikHelpers<SignUpFormValues>
   ) => {
     try {
-      const normalizedData: UserData = {
-        name: values.name.trim(),
-        familyName: values.familyName.trim(),
+      const payload: RegisterPayload = {
+        first_name: values.name.trim(),
+        last_name: values.familyName.trim(),
         email: values.email.trim().toLowerCase(),
         phone: values.phone.trim(),
         national_code: values.national_code.trim(),
@@ -113,20 +105,10 @@ function SignUp() {
         university: values.university.trim(),
       };
 
-      const payload: RegisterPayload = {
-        first_name: normalizedData.name,
-        last_name: normalizedData.familyName,
-        email: normalizedData.email,
-        phone: normalizedData.phone,
-        national_code: normalizedData.national_code,
-        tshirt_size: normalizedData.tshirt_size,
-        university: normalizedData.university,
-      };
-
       const res: RegisterSuccessResponse = await registerService(payload);
       console.log("register response:", res);
 
-      setUserData(normalizedData);
+      setUserData(payload);
       toast.success("کد تایید به ایمیل شما ارسال شد!");
       setStep("otp");
     } catch (error: any) {
@@ -176,15 +158,10 @@ function SignUp() {
 
       console.log("verify otp response:", res);
 
-      // 🆕 به‌جای localStorage، همه‌چیز رو به استور بده
-      // res.data از نوع AuthUserWithTokens هست
-      setAuth(res.data);
-
-      localStorage.setItem("access_token", res.data.access_token);
-      localStorage.setItem("refresh_token", res.data.refresh_token);
+      saveSession(res.data);
 
       toast.success("حساب کاربری شما با موفقیت ساخته شد!");
-      navigate("/dashboard");
+      navigate(invite ? `/accept-invite?token=${encodeURIComponent(invite)}` : "/dashboard");
     } catch (error: any) {
       console.error("Error verifying OTP:", error);
       const backend = error?.response?.data as VerifyOtpErrorResponse | undefined;
@@ -202,7 +179,7 @@ function SignUp() {
   const handleResendOtp = async () => {
     try {
       if (!userData) return;
-      // اینجا می‌تونی API ارسال مجدد OTP رو صدا بزنی
+      if (USE_MOCKS) await registerService(userData);
       console.log("Resending OTP to:", userData.email);
       toast.success("کد تایید دوباره به ایمیل شما ارسال شد.");
     } catch (error) {
@@ -553,7 +530,7 @@ function SignUp() {
 
             <p className="form-foot">
               قبلا حساب کاربری داشته‌اید؟{" "}
-              <Link className="link" to="/login">
+              <Link className="link" to={`/login${inviteQuery}`}>
                 وارد شوید
               </Link>
             </p>

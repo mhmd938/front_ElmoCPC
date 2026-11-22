@@ -3,8 +3,10 @@ import { Formik, Form, Field, type FieldProps } from "formik";
 import * as Yup from "yup";
 import { UserPlus, Send, ArrowLeft, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { inviteUserService } from "@/services/teamService";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { USE_MOCKS } from "@/services/mock/flags";
+import { getTeamForDashboardService, inviteUserService } from "@/services/teamService";
+import { getAccessToken, getWizardStorageKey } from "@/services/authSession";
 import type { InviteUserPayload } from "@/types/teamTypes";
 import ELMOCPC from "@/assets/ELMOCPC.svg";
 import CESA from "@/assets/CESA.svg";
@@ -61,6 +63,7 @@ interface MemberData {
 
 function InviteMember() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const initialValues: MemberData = {
@@ -77,18 +80,19 @@ function InviteMember() {
     try {
       setIsSubmitting(true);
 
-      const token = localStorage.getItem("access_token");
+      const token = getAccessToken();
       if (!token) {
         toast.error("توکن یافت نشد. لطفا دوباره وارد شوید.");
         navigate("/login");
         return;
       }
 
-      // دریافت teamId از localStorage یا props
-      const teamId = localStorage.getItem("teamId");
-      console.log("🏷️ teamId:", teamId);
+      const requestedTeam = params.get("teamId");
+      const teamId = USE_MOCKS
+        ? (await getTeamForDashboardService())?.id
+        : requestedTeam || localStorage.getItem(getWizardStorageKey("teamId"));
 
-      if (!teamId) {
+      if (!teamId || (requestedTeam && requestedTeam !== teamId)) {
         toast.error("تیم یافت نشد. لطفا ابتدا تیم ایجاد کنید.");
         navigate("/dashboard");
         return;

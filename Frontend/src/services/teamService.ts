@@ -12,6 +12,8 @@ import type {
 } from "@/types/teamTypes";
 
 import { getData, postData, putData, deleteData, postImageData } from "./services";
+import { USE_MOCKS } from "./mock/flags";
+import * as mockTeam from "./mock/mockTeam";
 
 // تایپ برای تیم در داشبورد
 export type DashboardTeam = {
@@ -92,6 +94,8 @@ export const getUserRegistrationStatus = (
    دریافت اطلاعات تیم برای نمایش در داشبورد
 ----------------------------------------- */
 export const getTeamForDashboardService = async (): Promise<DashboardTeam> => {
+  if (USE_MOCKS) return mockTeam.getTeamForDashboardService();
+
   try {
     const response = await getData({
       endPoint: "/v1/user/teams",
@@ -131,6 +135,7 @@ export const getTeamForDashboardService = async (): Promise<DashboardTeam> => {
 export const createTeamService = async (
   payload: CreateTeamPayload
 ): Promise<CreateTeamSuccessResponse> => {
+  if (USE_MOCKS) return mockTeam.createTeamService(payload);
   return postData({
     endPoint: "/v1/user/teams",
     data: payload,
@@ -141,6 +146,7 @@ export const createTeamService = async (
    GET TEAM
 ----------------------------------------- */
 export const getTeamService = async (): Promise<Team> => {
+  if (USE_MOCKS) return mockTeam.getTeamService();
   return getData({
     endPoint: "/v1/user/teams",
   });
@@ -153,6 +159,7 @@ export const updateTeamService = async (
   teamId: string,
   payload: UpdateTeamPayload
 ): Promise<Team> => {
+  if (USE_MOCKS) return mockTeam.updateTeamService(teamId, payload);
   return putData({
     endPoint: `/v1/user/teams/${teamId}`,
     data: payload,
@@ -163,6 +170,7 @@ export const updateTeamService = async (
    DELETE TEAM
 ----------------------------------------- */
 export const deleteTeamService = async (teamId: string): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.deleteTeamService(teamId);
   return deleteData({
     endPoint: `/v1/user/teams/${teamId}`,
   });
@@ -175,6 +183,7 @@ export const inviteUserService = async (
   teamId: string,
   payload: InviteUserPayload
 ): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.inviteUserService(teamId, payload);
   return postData({
     endPoint: `/v1/user/teams/${teamId}/invitations`,
     data: payload,
@@ -193,6 +202,7 @@ interface InvitesResponse {
 }
 
 export const getInvitesService = async (teamId: string): Promise<InvitesResponse> => {
+  if (USE_MOCKS) return mockTeam.getInvitesService(teamId);
   return getData({
     endPoint: `/v1/user/teams/${teamId}/invitations/pending`,
   });
@@ -201,6 +211,7 @@ export const getInvitesService = async (teamId: string): Promise<InvitesResponse
    CANCEL INVITE
 ----------------------------------------- */
 export const cancelInviteService = async (invitetoken: string, inviteTeamid: string): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.cancelInviteService(invitetoken, inviteTeamid);
   return deleteData({
     endPoint: `/v1/user/teams/${inviteTeamid}/invitations/${invitetoken}`,
   });
@@ -213,6 +224,7 @@ export const removeMemberService = async (
   teamId: string,
   memberId: string
 ): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.removeMemberService(teamId, memberId);
   return deleteData({
     endPoint: `/v1/user/teams/${teamId}/members/${memberId}`,
   });
@@ -222,6 +234,7 @@ export const removeMemberService = async (
    ACCEPT INVITE
 ----------------------------------------- */
 export const acceptInviteService = async (token: string): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.acceptInviteService(token);
   return postData({
     endPoint: `/v1/invitations/accept-team`,
     data: { token }, // 👈 این مهمه
@@ -232,6 +245,7 @@ export const acceptInviteService = async (token: string): Promise<void> => {
    REJECT INVITE
 ----------------------------------------- */
 export const rejectInviteService = async (token: string): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.rejectInviteService(token);
   return postData({
     endPoint: `/v1/invitations/reject-team`,
     data: { token }, // 👈 حتماً آبجکت باشه
@@ -243,6 +257,7 @@ export const rejectInviteService = async (token: string): Promise<void> => {
    LEAVE TEAM
 ----------------------------------------- */
 export const leaveTeamService = async (teamId: string): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.leaveTeamService(teamId);
   return postData({
     endPoint: `/v1/user/teams/${teamId}/leave`,
     data: {},
@@ -253,6 +268,7 @@ export const leaveTeamService = async (teamId: string): Promise<void> => {
    SUBMIT TEAM
 ----------------------------------------- */
 export const submitTeamService = async (teamId: string): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.submitTeamService(teamId);
   return postData({
     endPoint: `/v1/user/teams/${teamId}/submit`,
     data: {},
@@ -266,6 +282,7 @@ export const uploadReceiptService = async (
   teamId: string,
   formData: FormData
 ): Promise<void> => {
+  if (USE_MOCKS) return mockTeam.uploadReceiptService(teamId, formData);
   return postImageData({
     endPoint: `/v1/user/teams/${teamId}/upload-receipt`,
     data: formData,
@@ -276,6 +293,7 @@ export const uploadReceiptService = async (
    GET ALL TEAM STATUSES
 ----------------------------------------- */
 export const getAllTeamStatusesService = async (): Promise<TeamStatus[]> => {
+  if (USE_MOCKS) return mockTeam.getAllTeamStatusesService();
   return getData({
     endPoint: "/v1/user/teams/statuses",
   });
