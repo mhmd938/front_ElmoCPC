@@ -8,13 +8,20 @@ import Header from "@/components/Dashboard/Header/Header";
 import OverviewSection from "@/components/Dashboard/OverviewSection/OverviewSection";
 import TeamSection from "@/components/Dashboard/TeamSection/TeamSection";
 import LoadingSpinner from "@/components/Dashboard/Common/LoadingSpinner";
-// import DeleteTeamModal from "@/components/Dashboard/Modals/DeleteTeamModal";
+import DeleteTeamModal from "@/components/Dashboard/Modals/DeleteTeamModal";
 import UploadReceiptModal from "@/components/Dashboard/Modals/UploadReceiptModal";
 import SubmitTeamModal from "@/components/Dashboard/Modals/SubmitTeamModal";
+import { clearSession } from "@/services/authSession";
+
+const paymentInfo = {
+  ticketPrice: 660000,
+  cardNumber: "6104-3387-4761-8581",
+  bankName: "بانک ملت مهدی تقی دولابی",
+};
 
 function Dashboard() {
   const navigate = useNavigate();
-  const { authUser, clearAuth } = useUserStore();
+  const { authUser } = useUserStore();
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -28,6 +35,7 @@ function Dashboard() {
     daysLeft,
     notifications,
     handleSubmitTeam,
+    handleDeleteTeam,
     handleUploadReceipt,
     handleCancelInvite,
     handleStartSubmitProcess,
@@ -38,8 +46,6 @@ function Dashboard() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
 
-  console.log(showDeleteModal);
-
   useEffect(() => {
     // if (!authUser) {
     //   navigate("/login");
@@ -47,9 +53,7 @@ function Dashboard() {
   }, [authUser, navigate]);
 
   const handleLogout = () => {
-    clearAuth();
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+    clearSession();
     navigate("/login");
   };
 
@@ -102,11 +106,7 @@ function Dashboard() {
             daysLeft={daysLeft}
             notifications={notifications}
             onUploadReceipt={() => setShowUploadModal(true)}
-            paymentInfo={{
-              ticketPrice: 660000,
-              cardNumber: "6104-3387-4761-8581",
-              bankName: "بانک ملت مهدی تقی دولابی",
-            }}
+            paymentInfo={paymentInfo}
           />
         );
       case "team":
@@ -122,12 +122,8 @@ function Dashboard() {
             onUploadReceipt={() => setShowUploadModal(true)}
             onCancelInvite={handleCancelInvite}
             onCreateTeam={() => navigate("/buildteam")}
-            onInviteMember={() => navigate("/invitemember")}
-            paymentInfo={{
-              ticketPrice: 660000,
-              cardNumber: "6104-3387-4761-8581",
-              bankName: "بانک ملت مهدی تقی دولابی",
-            }}
+            onInviteMember={() => navigate(`/invitemember?teamId=${encodeURIComponent(teamData?.id ?? "")}`)}
+            paymentInfo={paymentInfo}
           />
         );
       // case "schedule":
@@ -201,22 +197,18 @@ function Dashboard() {
       </div>
 
       {/* Modals */}
-      {/* <DeleteTeamModal
+      <DeleteTeamModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         teamName={teamData?.name || ""}
         onConfirm={handleDeleteTeam}
-      /> */}
+      />
 
       <UploadReceiptModal
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
         onUpload={handleUploadReceipt}
-        paymentInfo={{
-          ticketPrice: 660000,
-          cardNumber: "6104-3387-4761-8581",
-          bankName: "بانک ملت مهدی تقی دولابی",
-        }}
+        paymentInfo={paymentInfo}
       />
 
       <SubmitTeamModal

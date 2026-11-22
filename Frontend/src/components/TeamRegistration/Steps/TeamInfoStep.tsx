@@ -4,12 +4,14 @@ import { Users } from "lucide-react";
 import FormHeader from "../Common/FormHeader";
 import * as Yup from "yup";
 
+interface TeamInfo {
+  teamName: string;
+  teamDescription: string;
+}
+
 interface TeamInfoStepProps {
-  initialValues: {
-    teamName: string;
-    teamDescription: string;
-  };
-  onSubmit: (values: any) => void;
+  initialValues: TeamInfo;
+  onSubmit: (values: TeamInfo) => Promise<void> | void;
   isSubmitting: boolean;
 }
 

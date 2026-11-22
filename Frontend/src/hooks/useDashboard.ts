@@ -1,5 +1,6 @@
 // src/pages/Dashboard/hooks/useDashboard.ts
 import { useState, useEffect, useCallback } from "react";
+import { USE_MOCKS } from "@/services/mock/flags";
 import { toast } from "sonner";
 import {
   getTeamForDashboardService,
@@ -53,7 +54,10 @@ export const useDashboard = (authUser: any) => {
 
   // Fetch invites
   const fetchInvites = useCallback(async () => {
-    if (!teamData) return;
+    if (!teamData || (USE_MOCKS && teamData.creator_id !== authUser?.id)) {
+      setInvites([]);
+      return;
+    }
 
     setInvitesLoading(true);
     try {
@@ -65,7 +69,7 @@ export const useDashboard = (authUser: any) => {
     } finally {
       setInvitesLoading(false);
     }
-  }, [teamData]);
+  }, [teamData, authUser?.id]);
 
   // Calculate days left
   const calculateDaysLeft = useCallback(() => {
@@ -97,7 +101,14 @@ export const useDashboard = (authUser: any) => {
 
   // Initialize user data
   useEffect(() => {
-    if (!authUser) return;
+    if (!authUser) {
+      setUserData(null);
+      setTeamData(null);
+      setInvites([]);
+      setIsCaptain(false);
+      setLoading(false);
+      return;
+    }
 
     const mappedUser: DashboardUser = {
       name: authUser.first_name,
@@ -128,9 +139,7 @@ export const useDashboard = (authUser: any) => {
 
   // Fetch invites when team data changes
   useEffect(() => {
-    if (teamData) {
-      fetchInvites();
-    }
+    fetchInvites();
   }, [teamData, fetchInvites]);
 
   // Calculate days left on mount
@@ -140,7 +149,7 @@ export const useDashboard = (authUser: any) => {
 
   // Handle delete team
   const handleDeleteTeam = async () => {
-    if (!teamData) return;
+    if (!teamData) return false;
 
     try {
       await deleteTeamService(teamData.id);
@@ -208,7 +217,12 @@ export const useDashboard = (authUser: any) => {
 
   // Handle start submit process
   const handleStartSubmitProcess = () => {
-    return invites?.length > 0 ? false : true;
+    if (invitesLoading) return false;
+    if (invites.length > 0) {
+      toast.error("ابتدا دعوت‌نامه‌های در انتظار را مدیریت کنید");
+      return false;
+    }
+    return true;
   };
 
   return {
