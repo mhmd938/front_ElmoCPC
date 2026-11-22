@@ -45,13 +45,11 @@ const OverviewSection = ({
         registrationStatus={getUserRegistrationStatus(teamData)}
       />
 
-      {teamData?.status === "waiting_for_payment" && (
-        <PaymentInfoSection
-          paymentInfo={paymentInfo}
-          formatPrice={formatPrice}
-          onUploadReceipt={onUploadReceipt}
-        />
-      )}
+      <PaymentInfoSection
+        paymentInfo={paymentInfo}
+        formatPrice={formatPrice}
+        onUploadReceipt={onUploadReceipt}
+      />
 
       <TeamStatusInfo teamData={teamData} formatPrice={formatPrice} />
 
