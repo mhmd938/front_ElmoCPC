@@ -2,6 +2,7 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import TeamHeader from "../TeamHeader";
 import TeamMembers from "../TeamMembers";
+import TeamStatusCard from "../TeamStatusCard";
 
 describe("TeamHeader design classes", () => {
   it("renders a team head card with a design status pill", () => {
@@ -65,5 +66,41 @@ describe("TeamMembers design classes", () => {
     expect(container.querySelector(".member-foot")).toBeInTheDocument();
     expect(container.querySelector(".badge.badge-cyan")).toHaveTextContent("کاپیتان");
     expect(container.innerHTML).not.toMatch(/#FFD500|bg-gradient|text-\[#/);
+  });
+});
+
+describe("TeamStatusCard design classes", () => {
+  const paymentInfo = {
+    ticketPrice: 660000,
+    cardNumber: "6104-3387-4761-8581",
+    bankName: "بانک ملت مهدی تقی دولابی",
+  };
+
+  it("renders the submitted state with design steps and alert", () => {
+    const { container } = render(
+      <TeamStatusCard
+        teamData={{ status: "submitted" }}
+        formatPrice={(price) => `${price} تومان`}
+        paymentInfo={paymentInfo}
+      />
+    );
+
+    expect(container.querySelector(".card.stack")).toBeInTheDocument();
+    expect(container.querySelectorAll(".status-step")).toHaveLength(3);
+    expect(container.querySelector(".alert.alert-info")).toBeInTheDocument();
+    expect(container.innerHTML).not.toMatch(/bg-(yellow|blue|orange|purple|green|red)-/);
+  });
+
+  it("renders payment cells when waiting for payment", () => {
+    const { container } = render(
+      <TeamStatusCard
+        teamData={{ status: "waiting_for_payment" }}
+        formatPrice={(price) => `${price} تومان`}
+        paymentInfo={paymentInfo}
+      />
+    );
+
+    expect(container.querySelector(".payment-grid")).toBeInTheDocument();
+    expect(container.querySelectorAll(".payment-cell")).toHaveLength(2);
   });
 });
