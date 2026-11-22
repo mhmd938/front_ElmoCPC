@@ -2928,6 +2928,11 @@ hr,
   color: var(--success);
 }
 
+.stat-icon.is-red {
+  background: var(--danger-soft);
+  color: var(--destructive);
+}
+
 /* Payment info card (receipt tone) */
 .payment-card {
   background: var(--receipt-soft);
