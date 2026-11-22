@@ -1,21 +1,13 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import CustomInput from "@/components/Custom/CustomInput";
 import { Formik, Form, Field, type FieldProps } from "formik";
 import * as Yup from "yup";
-import { UserPlus, Send, ArrowLeft } from "lucide-react";
-import BG from "@/assets/BG.png";
+import { UserPlus, Send, ArrowLeft, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { inviteUserService } from "@/services/teamService";
 import type { InviteUserPayload } from "@/types/teamTypes";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import ELMOCPC from "@/assets/ELMOCPC.svg";
+import CESA from "@/assets/CESA.svg";
 
 // Validation schema برای اطلاعات عضو
 const memberValidationSchema = Yup.object({
@@ -142,151 +134,224 @@ function InviteMember() {
   };
 
   return (
-    <div
-      className="relative w-full min-h-screen flex items-center justify-center p-4 bg-cover bg-center"
-      style={{
-        backgroundImage: `url(${BG})`,
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="w-full max-w-2xl">
-        {/* Form Container */}
-        <div className="bg-[#00274D]/90 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-white/20">
-          <Formik
-            initialValues={initialValues}
-            validationSchema={memberValidationSchema}
-            onSubmit={handleInviteMember}
-          >
-            {({ isSubmitting: formSubmitting }) => (
-              <Form>
-                {/* Header */}
-                <div className="text-center mb-8">
-                  <div className="inline-block p-4 bg-[#FFD500]/20 rounded-2xl mb-4">
-                    <UserPlus className="w-12 h-12 text-[#FFD500]" />
-                  </div>
-                  <h1 className="text-white text-3xl font-bold mb-2">
-                    دعوت عضو جدید
-                  </h1>
-                  <p className="text-gray-300">
-                    اطلاعات عضو جدید را وارد کنید تا دعوت‌نامه برای او ارسال شود
-                  </p>
-                </div>
+    <main className="auth-page" dir="rtl">
+      <section className="auth-card auth-card-2xl" aria-labelledby="invite-title">
+        <header className="form-header">
+          <span className="form-icon" aria-hidden="true">
+            <UserPlus className="icon-lg" />
+          </span>
+          <h1 className="form-title" id="invite-title">
+            دعوت عضو جدید
+          </h1>
+          <p className="form-desc">
+            اطلاعات عضو جدید را وارد کنید تا دعوت‌نامه برای او ارسال شود
+          </p>
+        </header>
 
-                {/* Form Fields */}
-                <div
-                  className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
-                  dir="rtl"
-                >
-                  <CustomInput
-                    name="name"
-                    type="text"
-                    label="نام"
-                    className="w-full px-4 py-3 rounded-lg"
-                  />
+        <Formik
+          initialValues={initialValues}
+          validationSchema={memberValidationSchema}
+          onSubmit={handleInviteMember}
+        >
+          {({ isSubmitting: formSubmitting }) => (
+            <Form>
+              <div className="form-stack">
+                <div className="form-grid">
+                  <Field name="name">
+                    {({ field, meta }: FieldProps) => (
+                      <div className="fl">
+                        <input
+                          {...field}
+                          id="invite-name"
+                          className="input fl-control"
+                          type="text"
+                          placeholder=" "
+                          autoComplete="given-name"
+                        />
+                        <label className="fl-label" htmlFor="invite-name">
+                          نام
+                        </label>
+                        {meta.touched && meta.error && (
+                          <p className="field-error">{meta.error}</p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
-                  <CustomInput
-                    name="familyName"
-                    type="text"
-                    label="نام خانوادگی"
-                    className="w-full px-4 py-3 rounded-lg"
-                  />
+                  <Field name="familyName">
+                    {({ field, meta }: FieldProps) => (
+                      <div className="fl">
+                        <input
+                          {...field}
+                          id="invite-family"
+                          className="input fl-control"
+                          type="text"
+                          placeholder=" "
+                          autoComplete="family-name"
+                        />
+                        <label className="fl-label" htmlFor="invite-family">
+                          نام خانوادگی
+                        </label>
+                        {meta.touched && meta.error && (
+                          <p className="field-error">{meta.error}</p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
-                  <CustomInput
-                    name="email"
-                    type="email"
-                    label="ایمیل"
-                    className="w-full px-4 py-3 rounded-lg"
-                    dir="ltr"
-                  />
+                  <Field name="email">
+                    {({ field, meta }: FieldProps) => (
+                      <div className="fl">
+                        <input
+                          {...field}
+                          id="invite-email"
+                          className="input fl-control"
+                          type="email"
+                          dir="ltr"
+                          placeholder=" "
+                          autoComplete="email"
+                        />
+                        <label className="fl-label" htmlFor="invite-email">
+                          ایمیل
+                        </label>
+                        {meta.touched && meta.error && (
+                          <p className="field-error">{meta.error}</p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
-                  <CustomInput
-                    name="phone"
-                    type="tel"
-                    label="شماره موبایل"
-                    className="w-full px-4 py-3 rounded-lg"
-                    dir="ltr"
-                    maxLength={11}
-                  />
+                  <Field name="phone">
+                    {({ field, meta }: FieldProps) => (
+                      <div className="fl">
+                        <input
+                          {...field}
+                          id="invite-phone"
+                          className="input fl-control"
+                          type="tel"
+                          dir="ltr"
+                          placeholder=" "
+                          autoComplete="tel"
+                          maxLength={11}
+                        />
+                        <label className="fl-label" htmlFor="invite-phone">
+                          شماره موبایل
+                        </label>
+                        {meta.touched && meta.error && (
+                          <p className="field-error">{meta.error}</p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
-                  <CustomInput
-                    name="university"
-                    type="text"
-                    label="نام دانشگاه"
-                    className="w-full px-4 py-3 rounded-lg"
-                  />
+                  <Field name="university">
+                    {({ field, meta }: FieldProps) => (
+                      <div className="fl">
+                        <input
+                          {...field}
+                          id="invite-university"
+                          className="input fl-control"
+                          type="text"
+                          placeholder=" "
+                        />
+                        <label className="fl-label" htmlFor="invite-university">
+                          نام دانشگاه
+                        </label>
+                        {meta.touched && meta.error && (
+                          <p className="field-error">{meta.error}</p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
-                  <CustomInput
-                    name="nationalCode"
-                    type="text"
-                    label="کد ملی"
-                    className="w-full px-4 py-3 rounded-lg"
-                    maxLength={10}
-                  />
+                  <Field name="nationalCode">
+                    {({ field, meta }: FieldProps) => (
+                      <div className="fl">
+                        <input
+                          {...field}
+                          id="invite-national-id"
+                          className="input fl-control"
+                          type="text"
+                          placeholder=" "
+                          maxLength={10}
+                        />
+                        <label
+                          className="fl-label"
+                          htmlFor="invite-national-id"
+                        >
+                          کد ملی
+                        </label>
+                        {meta.touched && meta.error && (
+                          <p className="field-error">{meta.error}</p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
                   <Field name="tshirtSize">
-                    {({ field, form }: FieldProps) => (
-                      <div className="space-y-2 rtl w-full">
-                        <label className="text-white text-sm">سایز تیشرت</label>
-
-                        <Select
-                          value={field.value}
-                          onValueChange={(val) =>
-                            form.setFieldValue(field.name, val)
-                          }
-                          dir="rtl"
-                        >
-                          <SelectTrigger className="w-full bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-3 rounded-lg">
-                            <SelectValue placeholder="سایز تیشرت را انتخاب کنید" />
-                          </SelectTrigger>
-
-                          <SelectContent className="rtl bg-gray-800 text-white border-white/20">
-                            <SelectItem value="M">M</SelectItem>
-                            <SelectItem value="L">L</SelectItem>
-                            <SelectItem value="XL">XL</SelectItem>
-                            <SelectItem value="XXL">XXL</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        {form.touched[field.name] &&
-                          form.errors[field.name] && (
-                            <p className="text-red-400 text-xs">
-                              {form.errors[field.name] as string}
-                            </p>
-                          )}
+                    {({ field, meta }: FieldProps) => (
+                      <div className="field">
+                        <label className="label" htmlFor="invite-tshirt">
+                          سایز تیشرت
+                        </label>
+                        <span className="select">
+                          <select {...field} id="invite-tshirt">
+                            <option value="">
+                              سایز تیشرت را انتخاب کنید
+                            </option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                          </select>
+                          <ChevronDown
+                            className="select-chevron icon-sm"
+                            aria-hidden="true"
+                          />
+                        </span>
+                        {meta.touched && meta.error && (
+                          <p className="field-error">{meta.error}</p>
+                        )}
                       </div>
                     )}
                   </Field>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-4">
-                  <Button
-                    type="button"
-                    onClick={() => navigate("/dashboard")}
-                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-200"
-                  >
-                    <ArrowLeft className="w-5 h-5 ml-2 inline-block" />
-                    بازگشت
-                  </Button>
-                  <Button
+                <div className="form-actions form-actions-fill">
+                  <button
                     type="submit"
+                    className="btn btn-yellow btn-lg"
                     disabled={formSubmitting || isSubmitting}
-                    className="flex-1 bg-[#FFD500] hover:bg-[#e6c200] text-[#00274D] font-semibold py-4 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#FFD500]/50 active:scale-95"
                   >
-                    <Send className="w-5 h-5 ml-2 inline-block" />
+                    <Send className="icon-sm" aria-hidden="true" />
                     {formSubmitting || isSubmitting
                       ? "در حال ارسال..."
                       : "ارسال دعوت"}
-                  </Button>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-lg"
+                    onClick={() => navigate("/dashboard")}
+                  >
+                    <ArrowLeft className="icon-sm" aria-hidden="true" />
+                    بازگشت
+                  </button>
                 </div>
-              </Form>
-            )}
-          </Formik>
-        </div>
-      </div>
-    </div>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </section>
+
+      <a href="/">
+        <img
+          className="corner-logo corner-logo-start"
+          src={ELMOCPC}
+          alt="ELMOCPC"
+        />
+      </a>
+      <img className="corner-logo corner-logo-end" src={CESA} alt="CESA" />
+    </main>
   );
 }
 
