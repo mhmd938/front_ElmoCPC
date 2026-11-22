@@ -159,18 +159,20 @@ function InviteMember() {
                 <div className="form-grid">
                   <Field name="name">
                     {({ field, meta }: FieldProps) => (
-                      <div className="fl">
-                        <input
-                          {...field}
-                          id="invite-name"
-                          className="input fl-control"
-                          type="text"
-                          placeholder=" "
-                          autoComplete="given-name"
-                        />
-                        <label className="fl-label" htmlFor="invite-name">
-                          نام
-                        </label>
+                      <div>
+                        <div className="fl">
+                          <input
+                            {...field}
+                            id="invite-name"
+                            className="input fl-control"
+                            type="text"
+                            placeholder=" "
+                            autoComplete="given-name"
+                          />
+                          <label className="fl-label" htmlFor="invite-name">
+                            نام
+                          </label>
+                        </div>
                         {meta.touched && meta.error && (
                           <p className="field-error">{meta.error}</p>
                         )}
@@ -180,18 +182,20 @@ function InviteMember() {
 
                   <Field name="familyName">
                     {({ field, meta }: FieldProps) => (
-                      <div className="fl">
-                        <input
-                          {...field}
-                          id="invite-family"
-                          className="input fl-control"
-                          type="text"
-                          placeholder=" "
-                          autoComplete="family-name"
-                        />
-                        <label className="fl-label" htmlFor="invite-family">
-                          نام خانوادگی
-                        </label>
+                      <div>
+                        <div className="fl">
+                          <input
+                            {...field}
+                            id="invite-family"
+                            className="input fl-control"
+                            type="text"
+                            placeholder=" "
+                            autoComplete="family-name"
+                          />
+                          <label className="fl-label" htmlFor="invite-family">
+                            نام خانوادگی
+                          </label>
+                        </div>
                         {meta.touched && meta.error && (
                           <p className="field-error">{meta.error}</p>
                         )}
@@ -201,19 +205,21 @@ function InviteMember() {
 
                   <Field name="email">
                     {({ field, meta }: FieldProps) => (
-                      <div className="fl">
-                        <input
-                          {...field}
-                          id="invite-email"
-                          className="input fl-control"
-                          type="email"
-                          dir="ltr"
-                          placeholder=" "
-                          autoComplete="email"
-                        />
-                        <label className="fl-label" htmlFor="invite-email">
-                          ایمیل
-                        </label>
+                      <div>
+                        <div className="fl">
+                          <input
+                            {...field}
+                            id="invite-email"
+                            className="input fl-control"
+                            type="email"
+                            dir="ltr"
+                            placeholder=" "
+                            autoComplete="email"
+                          />
+                          <label className="fl-label" htmlFor="invite-email">
+                            ایمیل
+                          </label>
+                        </div>
                         {meta.touched && meta.error && (
                           <p className="field-error">{meta.error}</p>
                         )}
@@ -223,20 +229,22 @@ function InviteMember() {
 
                   <Field name="phone">
                     {({ field, meta }: FieldProps) => (
-                      <div className="fl">
-                        <input
-                          {...field}
-                          id="invite-phone"
-                          className="input fl-control"
-                          type="tel"
-                          dir="ltr"
-                          placeholder=" "
-                          autoComplete="tel"
-                          maxLength={11}
-                        />
-                        <label className="fl-label" htmlFor="invite-phone">
-                          شماره موبایل
-                        </label>
+                      <div>
+                        <div className="fl">
+                          <input
+                            {...field}
+                            id="invite-phone"
+                            className="input fl-control"
+                            type="tel"
+                            dir="ltr"
+                            placeholder=" "
+                            autoComplete="tel"
+                            maxLength={11}
+                          />
+                          <label className="fl-label" htmlFor="invite-phone">
+                            شماره موبایل
+                          </label>
+                        </div>
                         {meta.touched && meta.error && (
                           <p className="field-error">{meta.error}</p>
                         )}
@@ -246,17 +254,19 @@ function InviteMember() {
 
                   <Field name="university">
                     {({ field, meta }: FieldProps) => (
-                      <div className="fl">
-                        <input
-                          {...field}
-                          id="invite-university"
-                          className="input fl-control"
-                          type="text"
-                          placeholder=" "
-                        />
-                        <label className="fl-label" htmlFor="invite-university">
-                          نام دانشگاه
-                        </label>
+                      <div>
+                        <div className="fl">
+                          <input
+                            {...field}
+                            id="invite-university"
+                            className="input fl-control"
+                            type="text"
+                            placeholder=" "
+                          />
+                          <label className="fl-label" htmlFor="invite-university">
+                            نام دانشگاه
+                          </label>
+                        </div>
                         {meta.touched && meta.error && (
                           <p className="field-error">{meta.error}</p>
                         )}
@@ -266,21 +276,23 @@ function InviteMember() {
 
                   <Field name="nationalCode">
                     {({ field, meta }: FieldProps) => (
-                      <div className="fl">
-                        <input
-                          {...field}
-                          id="invite-national-id"
-                          className="input fl-control"
-                          type="text"
-                          placeholder=" "
-                          maxLength={10}
-                        />
-                        <label
-                          className="fl-label"
-                          htmlFor="invite-national-id"
-                        >
-                          کد ملی
-                        </label>
+                      <div>
+                        <div className="fl">
+                          <input
+                            {...field}
+                            id="invite-national-id"
+                            className="input fl-control"
+                            type="text"
+                            placeholder=" "
+                            maxLength={10}
+                          />
+                          <label
+                            className="fl-label"
+                            htmlFor="invite-national-id"
+                          >
+                            کد ملی
+                          </label>
+                        </div>
                         {meta.touched && meta.error && (
                           <p className="field-error">{meta.error}</p>
                         )}
