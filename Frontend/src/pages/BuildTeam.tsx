@@ -107,7 +107,7 @@ function TeamRegistration() {
   };
 
   return (
-    <main className="auth-page">
+    <main className="auth-page wizard-page" dir="rtl">
       <div className="auth-stack">
         <ProgressBar
           steps={steps}
@@ -117,6 +117,7 @@ function TeamRegistration() {
 
         <section
           className="auth-card auth-card-wide"
+          key={currentStep}
           aria-labelledby="buildteam-title"
         >
           {renderStep()}

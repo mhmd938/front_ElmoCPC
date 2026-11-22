@@ -1,4 +1,6 @@
 // src/components/Landing/HeroSection/CTAButtons.tsx
+import { LayoutDashboard, LogIn, Trophy } from "lucide-react";
+
 interface CTAButtonsProps {
   isLoggedIn: boolean;
   onLogin: () => void;
@@ -31,6 +33,7 @@ const CTAButtons = ({
           className={`btn btn-primary${sizeClass}`}
           onClick={onDashboard}
         >
+          <LayoutDashboard className="icon-sm" aria-hidden="true" />
           {variant === "compact" ? "داشبورد" : "مشاهده داشبورد و وضعیت تیم"}
         </button>
       </div>
@@ -41,9 +44,10 @@ const CTAButtons = ({
     <div className={`${gap} ${className}`.trim()}>
       <button
         type="button"
-        className={`btn btn-primary${sizeClass}`}
+        className={`btn btn-yellow${sizeClass}`}
         onClick={onRegister}
       >
+        <Trophy className="icon-sm" aria-hidden="true" />
         {variant === "compact" ? "ثبت‌نام" : "ثبت‌نام در مسابقه"}
       </button>
       {showSecondaryButton && (
@@ -52,6 +56,7 @@ const CTAButtons = ({
           className={`btn btn-secondary${sizeClass}`}
           onClick={onLogin}
         >
+          <LogIn className="icon-sm" aria-hidden="true" />
           {variant === "compact" ? "ورود" : "ورود به حساب کاربری"}
         </button>
       )}

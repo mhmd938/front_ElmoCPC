@@ -1,5 +1,4 @@
 // src/pages/Dashboard/components/Header/Header.tsx
-import { ChevronLeft } from "lucide-react";
 
 interface HeaderProps {
   userData: {
@@ -8,8 +7,6 @@ interface HeaderProps {
   };
   teamData: any;
   isCaptain: boolean;
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
   onNavigateHome: () => void;
 }
 
@@ -17,8 +14,6 @@ const Header = ({
   userData,
   teamData,
   isCaptain,
-  sidebarOpen,
-  setSidebarOpen,
   onNavigateHome,
 }: HeaderProps) => {
   const role = teamData ? (isCaptain ? "کاپیتان تیم" : "عضو تیم") : "بدون تیم";
@@ -26,21 +21,6 @@ const Header = ({
   return (
     <header className="topbar">
       <div className="topbar-inner">
-        <button
-          type="button"
-          className="icon-btn"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-label="جمع کردن منوی کناری"
-          aria-expanded={sidebarOpen}
-        >
-          <ChevronLeft
-            className={`icon transition-transform${
-              sidebarOpen ? " rotate-180" : ""
-            }`}
-            aria-hidden="true"
-          />
-        </button>
-
         <button
           type="button"
           className="btn btn-ghost"
@@ -74,7 +54,6 @@ const Header = ({
               <span className="user-role">{role}</span>
             </span>
             <span className="badge badge-success">
-              <span className="dot" aria-hidden="true" />
               فعال
             </span>
           </div>

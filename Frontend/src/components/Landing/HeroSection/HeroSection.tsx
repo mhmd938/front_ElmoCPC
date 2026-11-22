@@ -1,6 +1,6 @@
 // src/components/Landing/HeroSection/HeroSection.tsx
 import { Users, Clock, Award } from "lucide-react";
-import elmocpc from "@/assets/ELMOCPC.svg";
+import cesa from "@/assets/CESA.svg";
 import CountdownTimer from "./CountdownTimer";
 import CTAButtons from "./CTAButtons";
 
@@ -27,14 +27,14 @@ const HeroSection = ({
   return (
     <section className="hero" id="home">
       <div className="container hero-inner">
-        <img className="hero-logo" src={elmocpc} alt="ELMOCPC Logo" />
+        <img className="hero-logo" src={cesa} alt="انجمن علمی مهندسی کامپیوتر" />
 
         <p className="wordmark wordmark-hero">
           <span className="wm-elmo">ELMO</span>
           <span className="wm-c1">C</span>
           <span className="wm-p">P</span>
           <span className="wm-c2">C</span>
-          <span className="wm-year"> 2025</span>
+          <span className="wm-year"> 2026</span>
         </p>
 
         <h1 className="hero-title">

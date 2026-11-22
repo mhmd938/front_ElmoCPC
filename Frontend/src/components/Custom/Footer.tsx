@@ -1,4 +1,4 @@
-import { Mail, Instagram, Send } from "lucide-react";
+﻿import { Mail, Instagram, Send } from "lucide-react";
 import cesa from "@/assets/CESA.svg";
 import uni from "@/assets/UNi.png";
 import elmocpc from "@/assets/ELMOCPC.svg";
@@ -11,44 +11,25 @@ const Footer = () => {
         <div className="footer-contact">
           <h2 className="footer-heading">تماس با ما</h2>
           <p className="footer-text">
-            برای اطللاعات بيشتر با ما در ارتباط باشید
+            برای اطلاعات بیشتر با ما در ارتباط باشید
           </p>
-          <ul className="contact-links">
+          <ul className="contact-links contact-links-icons">
             <li>
-              <a className="contact-link" href="mailto:Elmocpc@outlook.com">
-                <span className="contact-label">
-                  <Mail className="icon icon-sm" aria-hidden="true" />
-                  ایمیل
-                </span>
-                <span className="contact-value">Elmocpc@outlook.com</span>
+              <a className="contact-link contact-link-email" href="mailto:Elmocpc@outlook.com" aria-label="ایمیل Elmocpc@outlook.com">
+                <Mail className="contact-icon" aria-hidden="true" />
+                <span className="contact-tooltip" aria-hidden="true">ایمیل</span>
               </a>
             </li>
             <li>
-              <a
-                className="contact-link"
-                href="https://t.me/iustacm"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="contact-label">
-                  <Send className="icon icon-sm" aria-hidden="true" />
-                  تلگرام
-                </span>
-                <span className="contact-value">t.me/iustacm</span>
+              <a className="contact-link contact-link-telegram" href="https://t.me/iustacm" target="_blank" rel="noopener noreferrer" aria-label="تلگرام، آی‌یو‌اس‌تی‌ای‌سی‌ام">
+                <Send className="contact-icon" aria-hidden="true" />
+                <span className="contact-tooltip" aria-hidden="true">تلگرام</span>
               </a>
             </li>
             <li>
-              <a
-                className="contact-link"
-                href="https://instagram.com/cesa_iust"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="contact-label">
-                  <Instagram className="icon icon-sm" aria-hidden="true" />
-                  اینستاگرام
-                </span>
-                <span className="contact-value">instagram.com/cesa_iust</span>
+              <a className="contact-link contact-link-instagram" href="https://instagram.com/cesa_iust" target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام، سی‌ای‌اس‌ای آی‌یو‌اس‌تی">
+                <Instagram className="contact-icon" aria-hidden="true" />
+                <span className="contact-tooltip" aria-hidden="true">اینستاگرام</span>
               </a>
             </li>
           </ul>
@@ -62,7 +43,7 @@ const Footer = () => {
         </div>
 
         <div className="footer-copy">
-          <p>ELMOCPC 2025 © - تمامی حقوق محفوظ است</p>
+          <p>ELMOCPC 2026 © - تمامی حقوق محفوظ است</p>
           <p>ELMOCPC - Computer Engineering Scientific Associate</p>
         </div>
       </div>

@@ -45,4 +45,42 @@ describe("Dashboard sidebar", () => {
     fireEvent.click(screen.getByRole("button", { name: label }));
     expect(setActiveTab).toHaveBeenCalledWith(targetTab);
   });
+
+  it("closes after selecting a section at tablet widths", () => {
+    const setSidebarOpen = vi.fn();
+    const width = vi.spyOn(window, "innerWidth", "get").mockReturnValue(800);
+
+    render(
+      <Sidebar
+        activeTab="overview"
+        setActiveTab={vi.fn()}
+        sidebarOpen
+        setSidebarOpen={setSidebarOpen}
+        onLogout={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "تیم من" }));
+
+    expect(setSidebarOpen).toHaveBeenCalledWith(false);
+    width.mockRestore();
+  });
+
+  it("has an in-sidebar control to collapse the expanded sidebar", () => {
+    const setSidebarOpen = vi.fn();
+
+    render(
+      <Sidebar
+        activeTab="overview"
+        setActiveTab={vi.fn()}
+        sidebarOpen
+        setSidebarOpen={setSidebarOpen}
+        onLogout={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "کوچک کردن منو" }));
+
+    expect(setSidebarOpen).toHaveBeenCalledWith(false);
+  });
 });

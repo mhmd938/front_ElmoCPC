@@ -1,5 +1,5 @@
 // src/pages/Dashboard/components/Sidebar/Sidebar.tsx
-import { LogOut } from "lucide-react";
+import { ChevronLeft, LogOut } from "lucide-react";
 import MenuItem from "./menuItem";
 
 interface SidebarProps {
@@ -38,14 +38,27 @@ const Sidebar = ({
   return (
     <aside className={`sidebar${sidebarOpen ? "" : " is-collapsed"}`}>
       <div className="sidebar-head">
-        <div className="wordmark wordmark-sm">
-          <span className="wm-elmo">ELMO</span>
-          <span className="wm-c1">C</span>
-          <span className="wm-p">P</span>
-          <span className="wm-c2">C</span>
-          <span className="wm-year"> 2026</span>
+        <div className="sidebar-head-row">
+          <div className="wordmark wordmark-sm">
+            <span className="wm-elmo">ELMO</span>
+            <span className="wm-c1">C</span>
+            <span className="wm-p">P</span>
+            <span className="wm-c2">C</span>
+            <span className="wm-year"> 2026</span>
+          </div>
+          <button
+            type="button"
+            className="icon-btn sidebar-toggle"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? "کوچک کردن منو" : "باز کردن منو"}
+            aria-expanded={sidebarOpen}
+          >
+            <ChevronLeft
+              className={`icon${sidebarOpen ? " rotate-180" : ""}`}
+              aria-hidden="true"
+            />
+          </button>
         </div>
-        <p className="sidebar-sub">Dashboard</p>
       </div>
 
       <nav className="sidebar-nav" aria-label="بخش‌های داشبورد">
@@ -60,7 +73,7 @@ const Sidebar = ({
             disabled={item.disabled}
             onClick={() => {
               setActiveTab(item.id);
-              if (window.innerWidth < 768) setSidebarOpen(false);
+              if (window.innerWidth <= 900) setSidebarOpen(false);
             }}
           />
         ))}

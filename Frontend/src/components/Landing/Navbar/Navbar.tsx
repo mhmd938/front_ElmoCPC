@@ -1,6 +1,6 @@
 // src/components/Landing/Navbar/Navbar.tsx
-import { useState } from "react";
-import { Home, Info, Calendar, Trophy, Mail } from "lucide-react";
+import { useRef, useState } from "react";
+import { Home, Info, Calendar, Trophy, Mail, Menu, X } from "lucide-react";
 import Logo from "./Logo";
 import UserDropdown from "./UserDropdown";
 
@@ -32,6 +32,8 @@ const Navbar = ({
   onScrollToSection,
 }: NavbarProps) => {
   const [activeId, setActiveId] = useState("home");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuToggle = useRef<HTMLButtonElement>(null);
 
   const navItems = [
     { id: "home", label: "خانه" },
@@ -43,25 +45,58 @@ const Navbar = ({
 
   const handleNavClick = (id: string) => {
     setActiveId(id);
+    if (menuOpen) {
+      setMenuOpen(false);
+      menuToggle.current?.focus();
+    }
     if (id === "home") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0 });
       return;
     }
     onScrollToSection(id);
   };
 
   return (
-    <header className="navbar">
+    <header
+      className="navbar"
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && menuOpen) {
+          setMenuOpen(false);
+          menuToggle.current?.focus();
+        }
+      }}
+    >
       <div className="navbar-inner container">
-        <Logo />
+        <button
+          type="button"
+          className="btn btn-ghost nav-toggle"
+          aria-label="منوی اصلی"
+          aria-expanded={menuOpen}
+          aria-controls="landing-navigation"
+          ref={menuToggle}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+        </button>
+        <Logo
+          onClick={() => {
+            setActiveId("home");
+            setMenuOpen(false);
+          }}
+        />
 
-        <nav className="nav-links" aria-label="ناوبری اصلی">
+        <nav
+          id="landing-navigation"
+          className={`nav-links${menuOpen ? " is-open" : ""}`}
+          aria-label="ناوبری اصلی"
+        >
           {navItems.map((item) => {
             const Icon = NAV_ICONS[item.id];
             return (
               <a
                 key={item.id}
                 className={`nav-link${activeId === item.id ? " is-active" : ""}`}
+                aria-current={activeId === item.id ? "location" : undefined}
                 href={`#${item.id}`}
                 onClick={(event) => {
                   event.preventDefault();
@@ -87,7 +122,7 @@ const Navbar = ({
               <button type="button" className="btn btn-ghost" onClick={onLogin}>
                 ورود
               </button>
-              <button type="button" className="btn btn-primary" onClick={onRegister}>
+              <button type="button" className="btn btn-yellow" onClick={onRegister}>
                 ثبت‌نام
               </button>
             </>
