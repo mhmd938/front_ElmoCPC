@@ -33,11 +33,11 @@ const TeamMembers = ({ members }: TeamMembersProps) => {
               <span className="avatar" aria-hidden="true">
                 {member.name?.charAt(0)}
               </span>
-              <div className="user-meta">
+              <div className="user-meta min-w-0">
                 <span className="user-name">
                   {member.name} {member.familyName}
                 </span>
-                <span className="user-role" dir="ltr">
+                <span className="user-role wrap-anywhere" dir="ltr">
                   {member.email}
                 </span>
                 <span className="user-role">{member.phone}</span>

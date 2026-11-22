@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import source from "../AcceptTeamInvite.tsx?raw";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -26,8 +26,6 @@ describe("AcceptTeamInvite design shell", () => {
   });
 
   it("does not use the old background or hardcoded brand colors", () => {
-    const source = readFileSync("src/pages/AcceptTeamInvite.tsx", "utf8");
-
     expect(source).not.toMatch(/BG\.png|#00274D|#FFD500|rounded-3xl/);
   });
 });

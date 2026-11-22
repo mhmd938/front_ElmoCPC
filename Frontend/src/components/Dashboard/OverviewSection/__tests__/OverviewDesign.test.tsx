@@ -3,6 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 import TeamStatusInfo from "../TeamStatusInfo";
 
 describe("TeamStatusInfo design classes", () => {
+  it("renders the draft steps for an inherited object key", () => {
+    const { container } = render(
+      <TeamStatusInfo teamData={{ status: "constructor" }} formatPrice={String} />
+    );
+    expect(container.querySelector(".stat-icon.is-yellow")).toBeInTheDocument();
+    expect(container.querySelector(".status-step")).toBeInTheDocument();
+  });
+
   it("renders a submitted status with design card, steps, and alert", () => {
     const { container } = render(
       <TeamStatusInfo
@@ -77,10 +85,10 @@ describe("PaymentInfoSection design classes", () => {
     expect(container.querySelector(".payment-card")).toBeInTheDocument();
   });
 
-  it("renders without NaN or undefined when payment info is empty", () => {
+  it.each([undefined, { ticketPrice: 0, cardNumber: "", bankName: "" }])("renders unloaded or empty payment info %j", (paymentInfo) => {
     const { container } = render(
       <PaymentInfoSection
-        paymentInfo={{ ticketPrice: 0, cardNumber: "", bankName: "" }}
+        paymentInfo={paymentInfo}
         formatPrice={(price) => `${price} تومان`}
         onUploadReceipt={vi.fn()}
       />

@@ -2,7 +2,7 @@
 import { Receipt, Upload } from "lucide-react";
 
 interface PaymentInfoSectionProps {
-  paymentInfo: {
+  paymentInfo?: {
     ticketPrice: number;
     cardNumber: string;
     bankName: string;
@@ -31,15 +31,15 @@ const PaymentInfoSection = ({
         <div className="payment-cell">
           <p className="payment-label">مبلغ قابل پرداخت</p>
           <p className="payment-amount">
-            {formatPrice(paymentInfo.ticketPrice)}
+            {paymentInfo?.ticketPrice != null ? formatPrice(paymentInfo.ticketPrice) : "—"}
           </p>
         </div>
         <div className="payment-cell">
           <p className="payment-label">شماره کارت</p>
           <p className="payment-number" dir="ltr">
-            {paymentInfo.cardNumber}
+            {paymentInfo?.cardNumber || "—"}
           </p>
-          <p className="payment-bank">{paymentInfo.bankName}</p>
+          <p className="payment-bank">{paymentInfo?.bankName}</p>
         </div>
       </div>
 

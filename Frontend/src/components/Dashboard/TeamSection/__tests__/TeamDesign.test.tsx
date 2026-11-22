@@ -65,6 +65,7 @@ describe("TeamMembers design classes", () => {
 
     expect(container.querySelector(".member-card")).toBeInTheDocument();
     expect(container.querySelector(".member-top")).toBeInTheDocument();
+    expect(screen.getByText("nora@elmocpc.ir")).toHaveClass("wrap-anywhere");
     expect(container.querySelector(".member-foot")).toBeInTheDocument();
     expect(container.querySelector(".badge.badge-cyan")).toHaveTextContent("کاپیتان");
     expect(container.innerHTML).not.toMatch(/#FFD500|bg-gradient|text-\[#/);
@@ -91,6 +92,14 @@ describe("TeamStatusCard design classes", () => {
     expect(container.querySelectorAll(".status-step")).toHaveLength(3);
     expect(container.querySelector(".alert.alert-info")).toBeInTheDocument();
     expect(container.innerHTML).not.toMatch(/bg-(yellow|blue|orange|purple|green|red)-/);
+  });
+
+  it("renders draft steps for an inherited object key", () => {
+    const { container } = render(
+      <TeamStatusCard teamData={{ status: "constructor" }} formatPrice={String} paymentInfo={paymentInfo} />
+    );
+    expect(container.querySelector(".stat-icon.is-yellow")).toBeInTheDocument();
+    expect(container.querySelector(".status-step")).toBeInTheDocument();
   });
 
   it("renders payment cells when waiting for payment", () => {

@@ -13,7 +13,7 @@ interface OverviewSectionProps {
   daysLeft: number;
   notifications: any[];
   onUploadReceipt: () => void;
-  paymentInfo: {
+  paymentInfo?: {
     ticketPrice: number;
     cardNumber: string;
     bankName: string;

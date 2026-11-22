@@ -68,7 +68,6 @@ function AdminTeamsApproval() {
     id: number;
     teamName: string;
     teamId?: number; // اضافه کردن teamId
-    approved?: boolean;
   } | null>(null);
   const [verificationNotes, setVerificationNotes] = useState("");
   const [pendingReceipts, setPendingReceipts] = useState<Receipt[]>([]);

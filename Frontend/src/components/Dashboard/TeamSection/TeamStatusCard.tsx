@@ -127,7 +127,9 @@ const TeamStatusCard = ({
   formatPrice,
   paymentInfo,
 }: TeamStatusCardProps) => {
-  const config = statusConfig[teamData.status] || statusConfig.draft;
+  const config = Object.hasOwn(statusConfig, teamData.status)
+    ? statusConfig[teamData.status]
+    : statusConfig.draft;
   const Icon = config.icon;
   const note =
     teamData.status === "waiting_for_payment"

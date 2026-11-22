@@ -118,7 +118,7 @@ function Dashboard() {
             loading={teamLoading}
             onRefresh={fetchTeamData}
             onDeleteTeam={() => setShowDeleteModal(true)}
-            onSubmitTeam={() => handleStartSubmitProcess()}
+            onSubmitTeam={() => setShowSubmitModal(handleStartSubmitProcess())}
             onUploadReceipt={() => setShowUploadModal(true)}
             onCancelInvite={handleCancelInvite}
             onCreateTeam={() => navigate("/buildteam")}
