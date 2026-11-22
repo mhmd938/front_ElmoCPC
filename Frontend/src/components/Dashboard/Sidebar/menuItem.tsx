@@ -8,7 +8,8 @@ interface MenuItemProps {
   icon: string;
   activeTab: string;
   sidebarOpen: boolean;
-  onClick: () => void;
+  onClick?: () => void;
+  disabled?: boolean;
 }
 
 const MenuItem = ({
@@ -18,6 +19,7 @@ const MenuItem = ({
   activeTab,
   sidebarOpen,
   onClick,
+  disabled = false,
 }: MenuItemProps) => {
   const IconComponent = (LucideIcons as any)[icon] as LucideIcon;
   const isActive = activeTab === id;
@@ -25,9 +27,10 @@ const MenuItem = ({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
       className={`sidebar-link${isActive ? " is-active" : ""}`}
       aria-current={isActive ? "page" : undefined}
+      aria-disabled={disabled || undefined}
     >
       <IconComponent className="icon" aria-hidden="true" />
       {sidebarOpen && <span className="sidebar-label">{label}</span>}

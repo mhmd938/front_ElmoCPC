@@ -1743,6 +1743,11 @@ hr,
   font-weight: var(--fw-semibold);
 }
 
+.sidebar-link[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .sidebar-foot {
   padding: var(--space-4);
   border-top: 1px solid var(--border);
