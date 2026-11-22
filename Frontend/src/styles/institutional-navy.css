@@ -2493,6 +2493,11 @@ hr,
   background: var(--accent);
 }
 
+.dropzone.is-dragging {
+  border-color: var(--ring);
+  background: var(--primary-soft);
+}
+
 /* ------------------------------------------------------------
    27. Auth shell (signup / login / buildteam / invite pages, Task 3)
    ------------------------------------------------------------ */
