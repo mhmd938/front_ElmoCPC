@@ -56,22 +56,24 @@ const InvitesList = ({
 
       <div className="list">
         {invites.map((invite) => (
-          <div className="list-row" key={invite.id}>
-            <span className="stat-icon is-yellow" aria-hidden="true">
-              <Clock className="icon" />
-            </span>
-            <div className="list-main">
-              <span className="list-title">
-                {invite.first_name} {invite.last_name}
+          <div className="list-row max-sm:flex-col max-sm:items-stretch!" key={invite.id}>
+            <div className="flex min-w-0 flex-1 items-center gap-4">
+              <span className="stat-icon is-yellow" aria-hidden="true">
+                <Clock className="icon" />
               </span>
-              <span className="list-meta" dir="ltr">
-                {invite.email}
-              </span>
-              <span className="list-meta">
-                انقضا: {formatDate(invite.expires_at)}
-              </span>
+              <div className="list-main">
+                <span className="list-title">
+                  {invite.first_name} {invite.last_name}
+                </span>
+                <span className="list-meta wrap-anywhere" dir="ltr">
+                  {invite.email}
+                </span>
+                <span className="list-meta">
+                  انقضا: {formatDate(invite.expires_at)}
+                </span>
+              </div>
             </div>
-            <div className="list-actions">
+            <div className="list-actions max-sm:flex-wrap max-sm:justify-between">
               <span className="status-pill is-waiting">
                 <span className="dot" aria-hidden="true" />
                 در انتظار پاسخ

@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import TeamHeader from "../TeamHeader";
 import TeamMembers from "../TeamMembers";
@@ -109,13 +109,14 @@ describe("TeamStatusCard design classes", () => {
 
 describe("InvitesList design classes", () => {
   it("renders a design list row with a waiting pill", () => {
+    const email = `${"a".repeat(64)}@example.com`;
     const { container } = render(
       <InvitesList
         invites={[
           {
             id: "1",
             token: "tok",
-            email: "mahdi@example.com",
+            email,
             first_name: "مهدی",
             last_name: "احمدی",
             expires_at: "2026-11-19T00:00:00Z",
@@ -128,7 +129,9 @@ describe("InvitesList design classes", () => {
     );
 
     expect(container.querySelector(".card")).toBeInTheDocument();
-    expect(container.querySelector(".list-row")).toBeInTheDocument();
+    expect(container.querySelector(".list-row")).toHaveClass("max-sm:flex-col", "max-sm:items-stretch!");
+    expect(container.querySelector(".list-actions")).toHaveClass("max-sm:flex-wrap");
+    expect(screen.getByText(email)).toHaveClass("list-meta", "wrap-anywhere");
     expect(container.querySelector(".status-pill.is-waiting")).toBeInTheDocument();
     expect(container.querySelector(".btn.btn-destructive")).toBeInTheDocument();
     expect(container.innerHTML).not.toMatch(/bg-(yellow|red|blue)-/);
