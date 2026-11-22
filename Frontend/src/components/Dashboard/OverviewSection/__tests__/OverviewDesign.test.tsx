@@ -90,3 +90,39 @@ describe("PaymentInfoSection design classes", () => {
     expect(container.textContent).not.toMatch(/NaN|undefined/);
   });
 });
+
+import NotificationsList from "../NotificationsList";
+
+describe("NotificationsList design classes", () => {
+  it("renders the design empty state", () => {
+    const { container } = render(<NotificationsList notifications={[]} />);
+
+    expect(container.querySelector(".empty")).toBeInTheDocument();
+    expect(container.querySelector(".empty-text")).toHaveTextContent(
+      "اطلاعیه‌ای برای نمایش وجود ندارد"
+    );
+  });
+
+  it("renders unread notifications as list rows with a badge", () => {
+    const { container } = render(
+      <NotificationsList
+        notifications={[
+          {
+            id: 1,
+            title: "اطلاعیه مهم",
+            message: "زمان مسابقه تغییر کرد",
+            type: "warning",
+            date: "۱۴۰۴/۰۹/۰۱",
+            read: false,
+          },
+        ]}
+      />
+    );
+
+    expect(container.querySelector(".list-row")).toBeInTheDocument();
+    expect(container.querySelector(".badge.badge-warning")).toHaveTextContent(
+      "جدید"
+    );
+    expect(container.innerHTML).not.toMatch(/#FFD500|bg-white|text-gray/);
+  });
+});
