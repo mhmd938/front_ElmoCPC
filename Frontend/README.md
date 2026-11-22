@@ -1,135 +1,95 @@
-# React + TypeScript + Zustand Project Setup & Usage Guide
+# ELMOCPC frontend
 
-This document explains how to set up and work with the project.
+React + TypeScript + Zustand frontend for the ELMOCPC registration flow. The
+project has two development modes:
 
----
+- `npm run dev:mock` starts the backend-free demo. Service calls are answered
+  by the local mock twins and state is persisted in the browser.
+- `npm run dev` starts the API-backed mode. It uses the configured
+  `https://api.elmocpc.ir` transport and does not accept mock sessions.
 
-## 🚀 Getting Started
+## Setup
 
-### Prerequisites
+From this directory, install the lockfile exactly and start the mode you need:
 
--   **Node.js** (recommended: latest LTS version)
--   **npm**
-
-### Installation
-
-Clone the repository and install dependencies:
-
-```bash
-npm install
+```
+npm ci
+npm run dev:mock
 ```
 
-### Running the Development Server
+The Vite server is normally available at
+[http://localhost:5173](http://localhost:5173). See
+[`src/services/mock/README.md`](src/services/mock/README.md) for the synthetic
+accounts, fixture state, account-switching workflow, receipt workflow, and
+mock-state reset instructions.
 
-Start the development server with:
+Useful verification commands:
 
-```bash
-npm run dev
 ```
-
-It runs on **[http://localhost:3000](http://localhost:3000)**.
-
-### Build
-
-```bash
+npm test
 npm run build
+npm run lint
 ```
 
----
+## Route inventory
 
-## 📂 Project Structure
+Routes are defined in `src/routes/routes.tsx`. Direct-open a route in the
+account state shown below when running the mock mode.
+
+| Path | Expected state | What to exercise |
+| --- | --- | --- |
+| `/` | Anonymous | Public landing page and navigation. |
+| `/camp` | Anonymous | Bootcamp details; the registration-deadline CTAs are intentionally disabled. |
+| `/signup` | Anonymous | Create a synthetic account, request an OTP, and verify it. |
+| `/login` | Anonymous or signed out | Start an OTP login; preserve `?invite=<token>` when entering from an invite link. |
+| `/dashboard` | Signed-in participant | Review team status, pending invites, logout, and reload persistence. |
+| `/buildteam` | Signed-in participant without a team | Create/edit a draft team and invite members from the wizard. |
+| `/invitemember` | Signed-in captain with a draft team | Send a standalone invitation; in mock mode the current team is resolved from the session. |
+| `/accept-invite?token=<token>` | Signed-in invite recipient, or anonymous visitor who can sign in/sign up | Accept or reject a recipient-bound invitation. |
+| `/admin` | Signed-in `admin@example.test` | Review team status, receipt status, users, search, and status filters. Participants are redirected to `/dashboard`. |
+
+The browser workflow should use one origin for every account. Sign out before
+switching accounts; the mock session intentionally supports one active account
+per browser profile and origin.
+
+## Test matrix
+
+The automated suite keeps transport routing and mock behavior separate. The
+focused files below are the acceptance matrix; `npm test` runs all of them.
+
+| Area | Test file(s) | Coverage |
+| --- | --- | --- |
+| Transport guards | `src/services/__tests__/mockRouting.test.ts` | All four auth, fifteen team, and six admin public services route to their mock twin in mock mode; arguments and response shapes are preserved; direct `fetch` and transport calls stay at zero; real-mode smoke still reaches `getData`. |
+| Auth and sessions | `src/services/__tests__/mockAuth.test.ts`, `src/pages/__tests__/mockAuthPages.test.tsx` | Seeded accounts, signup, email-bound OTPs, expiry/resend, replay rejection, mock/real storage isolation, admin routing, and logout. |
+| Team lifecycle | `src/services/__tests__/mockTeam.test.ts`, `src/pages/__tests__/inviteMember.test.tsx` | Draft CRUD, captain permissions, capacity, invite validation, cancellation, rejection/reinvite, acceptance, leave/remove, delete/recreate, and wizard persistence. |
+| Invite entry points | `src/pages/__tests__/AcceptTeamInvite.test.tsx` | Encoded token routing, anonymous return-to-invite flow, recipient checks, accept, and reject. |
+| Submission and review | `src/services/__tests__/mockReview.test.ts`, `src/pages/__tests__/mockReviewPages.test.tsx` | Submit → admin approval → receipt upload → receipt approval/rejection, seeded branches, receipt preview, filters, and reviewed-state updates. |
+| Shared UI regressions | `src/components/Dashboard/Modals/__tests__/ModalDesign.test.tsx`, `src/components/Dashboard/Sidebar/__tests__/Sidebar.test.tsx`, and other `src/**/__tests__` files | Modal guards, disabled actions, navigation, and component-level behavior. |
+
+The request inventory can be reviewed with:
+
+```
+rg -n 'api\.elmocpc\.ir|fetch\(|getData\(|postData\(|postImageData\(' src
+```
+
+Every routed page service call is guarded before the real transport, and the
+transport assertions in `mockRouting.test.ts` are the automated check for that
+contract.
+
+## Project structure
 
 ```
 src/
-├── assets/               # Static files like images
-├── components/           # Reusable components
-│   ├── Custom/           # Custom components (buttons, inputs, toast, etc.)
-│   └── ui/               # shadcn/ui components (pre-styled components)
-├── layouts/              # Layout components
-├── pages/                # Page components
-├── routes/
-│   └── route.tsx         # Central route configuration
-├── services/             # API service layer
-│   ├── services.ts       # Generic request templates (GET, POST, PUT, DELETE)
-│   └── authService.ts    # Example: authentication services
+├── components/           # Shared UI and dashboard sections
+├── hooks/                # Page workflows and stateful behavior
+├── pages/                # Routed pages
+├── routes/               # Browser route configuration
+├── services/             # API services and backend-free mock twins
 ├── store/                # Zustand stores
-│   └── useProfileStore.ts # Example store for user profile state
-├── types/                # TypeScript types & interfaces
-│   └── authTypes.ts      # Example: auth-related types
-├── utils/                # Utility functions
-│   └── translateNumbers.ts # Example utility function
-└── toast/                # Toast notifications setup
+├── types/                # Shared TypeScript contracts
+└── utils/                # Small shared utilities
 ```
 
----
-
-## 🗄️ State Management (Zustand)
-
-Stores are located in `src/store/`. Example usage of a persisted profile store:
-
-```ts
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import type { UserState } from "@/types/userTypes";
-
-const useProfileStore = create<UserState>()(
-	persist(
-		(set) => ({
-			username: null,
-			setUsername: (username: string) => set({ username }),
-		}),
-		{
-			name: "profile-storage",
-			storage: createJSONStorage(() => sessionStorage),
-		}
-	)
-);
-
-export default useProfileStore;
-```
-
-Example usage in a component:
-
-```ts
-import useProfileStore from "@/store/useProfileStore";
-
-const username = useProfileStore((state) => state.username);
-const setUsername = useProfileStore((state) => state.setUsername);
-```
-
----
-
-## 🛠️ Services
-
-`services.ts` provides generic HTTP methods (GET, POST, PUT, DELETE, etc.). Specific services like `authService.ts` use these templates.
-
-Example (`authService.ts`):
-
-```ts
-import type { LoginPayload, LoginResponse } from "@/types/authTypes";
-import { postData } from "./services";
-
-export const loginService = async (
-	credentials: LoginPayload
-): Promise<LoginResponse> => {
-	return postData({
-		endPoint: `/v1/auth/login`,
-		data: credentials,
-	});
-};
-```
-
----
-
-## 📏 Conventions & Notes
-
--   **TypeScript types** should be placed in `src/types/`.
--   **Reusable utilities** belong in `src/utils/`.
--   **Assets** (images, icons, etc.) go inside `src/assets/`.
--   **Shadcn UI components** are in `src/components/ui/`.
--   **Toast notifications** are set up in the `toast/` folder.
--   Zustand stores should be persisted when needed and properly named to match file names.
-
----
-
-✅ You’re ready to start coding!
+The mock service layer deliberately keeps the same public service signatures
+and response shapes as the API-backed layer. This lets pages exercise the
+workflow without changing their service imports.
