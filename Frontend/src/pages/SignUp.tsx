@@ -212,7 +212,7 @@ function SignUp() {
   };
 
   return (
-    <main className="auth-page">
+    <main className="auth-page" dir="rtl">
       <section className="auth-card" aria-labelledby="signup-title">
         {step === "form" ? (
           <>

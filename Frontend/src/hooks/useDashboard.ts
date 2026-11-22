@@ -70,7 +70,7 @@ export const useDashboard = (authUser: any) => {
   // Calculate days left
   const calculateDaysLeft = useCallback(() => {
     const today = new Date();
-    const targetDate = new Date("2025-12-11");
+    const targetDate = new Date("2026-12-11");
     const diffTime = targetDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     setDaysLeft(diffDays);
@@ -92,12 +92,7 @@ export const useDashboard = (authUser: any) => {
       ];
     }
 
-    const baseNotifications = [];
-    // const today = new Date().toLocaleDateString("fa-IR");
-
-    // ... (rest of notification logic)
-    
-    return baseNotifications;
+    return [];
   }, []);
 
   // Initialize user data

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { AlertCircle, Users } from "lucide-react";
 import { toast } from "sonner";
-import BG from "@/assets/BG.png";
 import ELMOCPC from "@/assets/ELMOCPC.svg";
 import CESA from "@/assets/CESA.svg";
 import {
@@ -132,91 +131,96 @@ function AcceptTeamInvite() {
 
   if (!token) {
     return (
-      <div
-        className="relative w-full min-h-screen flex items-center justify-center p-4 bg-cover bg-center"
-        style={{ backgroundImage: `url(${BG})` }}
-      >
-        <div className="bg-[#00274D]/85 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-white/20">
-          <div className="flex flex-col items-center gap-6">
-            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
-              <span className="text-3xl text-red-400">✕</span>
-            </div>
-            <h1 className="text-white text-2xl text-center font-semibold">
+      <main className="auth-page" dir="rtl">
+        <section className="auth-card" aria-labelledby="accept-error-title">
+          <header className="form-header">
+            <span className="form-icon form-icon-round" aria-hidden="true">
+              <AlertCircle className="icon-lg" />
+            </span>
+            <h1 className="form-title" id="accept-error-title">
               خطا در پردازش دعوت
             </h1>
-            <p className="text-white/70 text-center text-sm">
-              توکن دعوت یافت نشد
-            </p>
-            <Button
+            <p className="form-desc">توکن دعوت یافت نشد</p>
+          </header>
+
+          <div className="form-actions form-actions-fill">
+            <button
+              type="button"
+              className="btn btn-yellow btn-lg"
               onClick={() => navigate("/login")}
-              className="w-full bg-[#FFD500] hover:bg-[#e6c200] text-[#00274D] font-semibold py-3 px-6 rounded-lg"
             >
               بازگشت به لاگین
-            </Button>
+            </button>
           </div>
-        </div>
-      </div>
+        </section>
+
+        <a href="/">
+          <img
+            className="corner-logo corner-logo-start"
+            src={ELMOCPC}
+            alt="ELMOCPC"
+          />
+        </a>
+        <img
+          className="corner-logo corner-logo-end"
+          src={CESA}
+          alt="CESA"
+        />
+      </main>
     );
   }
 
   return (
-    <div
-      className="relative w-full min-h-screen flex items-center justify-center p-4 bg-cover bg-center"
-      style={{ backgroundImage: `url(${BG})` }}
-    >
-      <div className="w-full max-w-md">
-        <div className="bg-[#00274D]/85 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-white/20">
-          <div className="flex flex-col items-center gap-6">
-            <div className="w-16 h-16 bg-[#FFD500]/20 rounded-full flex items-center justify-center">
-              <span className="text-3xl text-[#FFD500]">👥</span>
-            </div>
+    <main className="auth-page" dir="rtl">
+      <section className="auth-card" aria-labelledby="accept-title">
+        <header className="form-header">
+          <span className="form-icon form-icon-round" aria-hidden="true">
+            <Users className="icon-lg" />
+          </span>
+          <h1 className="form-title" id="accept-title">
+            دعوت به تیم
+          </h1>
+          <p className="form-desc">آیا می‌خواهید به این تیم اضافه شوید؟</p>
+        </header>
 
-            <h1 className="text-white text-2xl text-center font-semibold">
-              دعوت به تیم
-            </h1>
-
-            {error && (
-              <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 w-full">
-                <p className="text-red-300 text-center text-sm">{error}</p>
-              </div>
-            )}
-
-            <p className="text-white/70 text-center text-sm">
-              آیا می‌خواهید به این تیم اضافه شوید؟
-            </p>
-
-            <div className="flex gap-3 w-full" dir="rtl">
-              <Button
-                onClick={handleAcceptTeamInvite}
-                disabled={loading}
-                className="flex-1 bg-[#FFD500] hover:bg-[#e6c200] text-[#00274D] font-semibold py-3 px-6 rounded-lg disabled:opacity-50"
-              >
-                {loading ? "درحال پردازش..." : "قبول دعوت"}
-              </Button>
-              <Button
-                onClick={handleRejectTeamInvite}
-                disabled={loading}
-                className="flex-1 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-lg disabled:opacity-50 border border-white/20"
-              >
-                رد کردن
-              </Button>
-            </div>
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            <span className="alert-icon" aria-hidden="true">
+              <AlertCircle className="icon icon-sm" />
+            </span>
+            <p>{error}</p>
           </div>
+        )}
+
+        <div className="form-actions form-actions-fill">
+          <button
+            type="button"
+            className="btn btn-yellow btn-lg"
+            onClick={handleAcceptTeamInvite}
+            disabled={loading}
+          >
+            {loading ? "درحال پردازش..." : "قبول دعوت"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-lg"
+            onClick={handleRejectTeamInvite}
+            disabled={loading}
+          >
+            رد کردن
+          </button>
         </div>
-      </div>
+      </section>
 
-      <img
-        src={ELMOCPC}
-        alt="ELMOCPC Logo"
-        className="absolute bottom-4 right-4 w-32 opacity-80"
-      />
-
-      <img
-        src={CESA}
-        alt="CESA Logo"
-        className="absolute bottom-4 left-4 w-20 opacity-80"
-      />
-    </div>
+      <a href="/">
+        <img
+          className="corner-logo corner-logo-start"
+          src={ELMOCPC}
+          alt="ELMOCPC"
+        />
+      </a>
+      <img className="corner-logo corner-logo-end" src={CESA} alt="CESA" />
+    </main>
   );
 }
 

@@ -1,5 +1,14 @@
 // src/components/Landing/Sections/PrizesSection.tsx
-import { Award, ShieldCheck } from "lucide-react";
+import {
+  Award, ClipboardCheck, Clock, CodeXml, Laptop, LogOut, Medal,
+  Shield, ShieldCheck, Smartphone, TriangleAlert, Trophy, Upload, Users,
+} from "lucide-react";
+
+const prizeIcons = [Trophy, Medal, Medal, Award];
+const ruleIcons = [
+  Users, Clock, CodeXml, Shield, Laptop, Smartphone, TriangleAlert,
+  ClipboardCheck, LogOut, Upload,
+];
 
 const prizes = [
   { rank: "مقام اول", amount: "۱۵,۰۰۰,۰۰۰ تومان" },
@@ -80,12 +89,16 @@ const PrizesSection = () => {
             </p>
           </div>
           <div className="prizes-grid">
-            {prizes.map((prize) => (
-              <article className="card prize-card" key={prize.rank}>
-                <h3 className="prize-rank">{prize.rank}</h3>
-                <p className="prize-amount">{prize.amount}</p>
-              </article>
-            ))}
+            {prizes.map((prize, index) => {
+              const Icon = prizeIcons[index];
+              return (
+                <article className="card prize-card" key={prize.rank}>
+                  <Icon className="prize-icon" aria-hidden="true" />
+                  <h3 className="prize-rank">{prize.rank}</h3>
+                  <p className="prize-amount">{prize.amount}</p>
+                </article>
+              );
+            })}
           </div>
         </div>
 
@@ -101,12 +114,18 @@ const PrizesSection = () => {
             </p>
           </div>
           <div className="rules-grid">
-            {rules.map((rule) => (
-              <article className="card card-hover rule-card" key={rule.title}>
-                <h3 className="card-title">{rule.title}</h3>
-                <p className="card-text">{rule.description}</p>
-              </article>
-            ))}
+            {rules.map((rule, index) => {
+              const Icon = ruleIcons[index];
+              return (
+                <article className="card rule-card" key={rule.title}>
+                  <span className="rule-icon" aria-hidden="true"><Icon className="icon" /></span>
+                  <div>
+                    <h3 className="card-title">{rule.title}</h3>
+                    <p className="card-text">{rule.description}</p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </div>

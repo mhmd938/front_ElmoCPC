@@ -13,7 +13,7 @@ interface OverviewSectionProps {
   daysLeft: number;
   notifications: any[];
   onUploadReceipt: () => void;
-  paymentInfo: {
+  paymentInfo?: {
     ticketPrice: number;
     cardNumber: string;
     bankName: string;
@@ -45,13 +45,11 @@ const OverviewSection = ({
         registrationStatus={getUserRegistrationStatus(teamData)}
       />
 
-      {teamData?.status === "waiting_for_payment" && (
-        <PaymentInfoSection
-          paymentInfo={paymentInfo}
-          formatPrice={formatPrice}
-          onUploadReceipt={onUploadReceipt}
-        />
-      )}
+      <PaymentInfoSection
+        paymentInfo={paymentInfo}
+        formatPrice={formatPrice}
+        onUploadReceipt={onUploadReceipt}
+      />
 
       <TeamStatusInfo teamData={teamData} formatPrice={formatPrice} />
 

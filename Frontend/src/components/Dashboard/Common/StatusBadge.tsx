@@ -1,5 +1,4 @@
-// src/pages/Dashboard/components/Common/StatusBadge.tsx
-import { getStatusColor, translateTeamStatus } from "@/services/teamService";
+import { getStatusPillClass, translateTeamStatus } from "@/services/teamService";
 
 interface StatusBadgeProps {
   status: string;
@@ -7,11 +6,8 @@ interface StatusBadgeProps {
 
 const StatusBadge = ({ status }: StatusBadgeProps) => {
   return (
-    <span
-      className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-        status
-      )}`}
-    >
+    <span className={`status-pill ${getStatusPillClass(status)}`}>
+      <span className="dot" aria-hidden="true" />
       {translateTeamStatus(status)}
     </span>
   );

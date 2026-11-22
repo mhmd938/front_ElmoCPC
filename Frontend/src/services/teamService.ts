@@ -41,38 +41,50 @@ export const translateTeamStatus = (status: string): string => {
     'accepted': 'تایید شده',
     'rejected': 'رد شده'
   };
-  return statusMap[status] || status;
+  return Object.hasOwn(statusMap, status) ? statusMap[status] : status;
 };
 
-// تابع برای دریافت رنگ status
-export const getStatusColor = (status: string): string => {
-  const colorMap: { [key: string]: string } = {
-    'draft': 'text-gray-400 bg-gray-500/20',
-    'submitted': 'text-blue-400 bg-blue-500/20',
-    'waiting_for_payment': 'text-yellow-400 bg-yellow-500/20',
-    'receipt_pending': 'text-orange-400 bg-orange-500/20', 
-    'accepted': 'text-green-400 bg-green-500/20',
-    'rejected': 'text-red-400 bg-red-500/20'
+export type TeamStatusPill =
+  | "is-draft"
+  | "is-submitted"
+  | "is-waiting"
+  | "is-receipt"
+  | "is-accepted"
+  | "is-rejected";
+
+// تابع برای دریافت کلاس طراحی وضعیت
+export const getStatusPillClass = (status: string): TeamStatusPill => {
+  const pillMap: { [key: string]: TeamStatusPill } = {
+    draft: "is-draft",
+    submitted: "is-submitted",
+    waiting_for_payment: "is-waiting",
+    receipt_pending: "is-receipt",
+    accepted: "is-accepted",
+    rejected: "is-rejected",
   };
-  return colorMap[status] || 'text-gray-400 bg-gray-500/20';
+  return Object.hasOwn(pillMap, status) ? pillMap[status] : "is-draft";
 };
 
 // تابع برای دریافت وضعیت ثبت‌نام کاربر
-export const getUserRegistrationStatus = (teamData: DashboardTeam | null): { text: string; color: string } => {
+export const getUserRegistrationStatus = (
+  teamData: DashboardTeam | null
+): { text: string; color: TeamStatusPill } => {
   if (!teamData) {
-    return { text: 'ثبت‌نام نشده', color: 'text-red-400 bg-red-500/20' };
+    return { text: "ثبت‌نام نشده", color: "is-rejected" };
   }
 
-  const statusMap: { [key: string]: { text: string; color: string } } = {
-    'draft': { text: 'پیش‌نویس', color: 'text-gray-400 bg-gray-500/20' },
-    'submitted': { text: 'ثبت شده', color: 'text-blue-400 bg-blue-500/20' },
-    'waiting_for_payment': { text: 'در انتظار پرداخت', color: 'text-yellow-400 bg-yellow-500/20' },
-    'receipt_pending': { text: 'در انتظار تایید', color: 'text-orange-400 bg-orange-500/20' },
-    'accepted': { text: 'تایید شده', color: 'text-green-400 bg-green-500/20' },
-    'rejected': { text: 'رد شده', color: 'text-red-400 bg-red-500/20' }
+  const statusMap: { [key: string]: { text: string; color: TeamStatusPill } } = {
+    draft: { text: "پیش‌نویس", color: "is-draft" },
+    submitted: { text: "ثبت شده", color: "is-submitted" },
+    waiting_for_payment: { text: "در انتظار پرداخت", color: "is-waiting" },
+    receipt_pending: { text: "در انتظار تایید", color: "is-receipt" },
+    accepted: { text: "تایید شده", color: "is-accepted" },
+    rejected: { text: "رد شده", color: "is-rejected" },
   };
 
-  return statusMap[teamData.status] || { text: 'نامشخص', color: 'text-gray-400 bg-gray-500/20' };
+  return Object.hasOwn(statusMap, teamData.status)
+    ? statusMap[teamData.status]
+    : { text: "نامشخص", color: "is-draft" };
 };
 
 /* -----------------------------------------

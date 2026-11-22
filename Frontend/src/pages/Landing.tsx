@@ -11,7 +11,7 @@ import CTASection from "@/components/Landing/Sections/CTASection";
 import Footer from "@/components/Custom/Footer";
 
 function ICPCLanding() {
-  const countdown = useCountdown(new Date("2025-12-12T08:00:00"));
+  const countdown = useCountdown(new Date("2026-12-12T08:00:00"));
   const { isLoggedIn, displayName, handleLogout } = useUserAuth();
 
   const handleRegisterClick = () => {
@@ -27,11 +27,11 @@ function ICPCLanding() {
   };
 
   const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById(id)?.scrollIntoView();
   };
 
   return (
-    <div dir="rtl">
+    <div className="event-page landing-page" dir="rtl">
       <Navbar
         isLoggedIn={isLoggedIn}
         displayName={displayName}

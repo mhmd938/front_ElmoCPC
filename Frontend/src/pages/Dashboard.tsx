@@ -118,7 +118,7 @@ function Dashboard() {
             loading={teamLoading}
             onRefresh={fetchTeamData}
             onDeleteTeam={() => setShowDeleteModal(true)}
-            onSubmitTeam={() => handleStartSubmitProcess()}
+            onSubmitTeam={() => setShowSubmitModal(handleStartSubmitProcess())}
             onUploadReceipt={() => setShowUploadModal(true)}
             onCancelInvite={handleCancelInvite}
             onCreateTeam={() => navigate("/buildteam")}
@@ -144,7 +144,7 @@ function Dashboard() {
   const activeContent = renderActiveTab();
 
   return (
-    <div dir="rtl">
+    <div className="dashboard-page" dir="rtl">
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -158,8 +158,6 @@ function Dashboard() {
           userData={userData}
           teamData={teamData}
           isCaptain={isCaptain}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
           onNavigateHome={() => navigate("/")}
         />
 

@@ -10,14 +10,6 @@ interface StatsCardsProps {
   };
 }
 
-const getStatusVariant = (color: string) => {
-  if (color.includes("green")) return "is-accepted";
-  if (color.includes("blue")) return "is-submitted";
-  if (color.includes("yellow") || color.includes("orange")) return "is-waiting";
-  if (color.includes("red")) return "is-rejected";
-  return "is-draft";
-};
-
 const StatsCards = ({
   teamMembers,
   daysLeft,
@@ -48,7 +40,7 @@ const StatsCards = ({
         <span className="stat-icon is-green" aria-hidden="true">
           <CheckCircle className="icon" />
         </span>
-        <span className={`status-pill ${getStatusVariant(registrationStatus.color)}`}>
+        <span className={`status-pill ${registrationStatus.color}`}>
           {registrationStatus.text}
         </span>
         <p className="stat-label">وضعیت ثبت‌نام</p>

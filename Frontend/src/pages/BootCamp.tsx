@@ -110,7 +110,7 @@ function BootcampDetails() {
   ];
 
   return (
-    <div dir="rtl">
+    <div className="event-page camp-page" dir="rtl">
       <header className="back-header">
         <div className="back-header-inner between">
           <Link className="back-link" to="/">
@@ -134,7 +134,7 @@ function BootcampDetails() {
           </span>
 
           <h2 className="camp-title" id="camp-hero-title">
-            آماده‌سازی پیشرفته برای ELMOCPC 2025
+            آماده‌سازی پیشرفته برای ELMOCPC 2026
           </h2>
 
           <p className="camp-subtitle">

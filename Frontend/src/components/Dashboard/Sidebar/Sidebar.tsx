@@ -1,5 +1,5 @@
 // src/pages/Dashboard/components/Sidebar/Sidebar.tsx
-import { LogOut } from "lucide-react";
+import { ChevronLeft, LogOut } from "lucide-react";
 import MenuItem from "./menuItem";
 
 interface SidebarProps {
@@ -18,24 +18,47 @@ const Sidebar = ({
   onLogout,
 }: SidebarProps) => {
   const menuItems = [
-    { id: "overview", label: "خانه", icon: "User" },
-    { id: "team", label: "تیم من", icon: "Users" },
-    { id: "schedule", label: "برنامه مسابقات", icon: "Calendar" },
-    { id: "notifications", label: "اطلاعیه‌ها", icon: "Bell" },
-    { id: "settings", label: "تنظیمات", icon: "Settings" },
+    { id: "overview", label: "خانه", icon: "User", disabled: false },
+    { id: "team", label: "تیم من", icon: "Users", disabled: false },
+    {
+      id: "schedule",
+      label: "برنامه مسابقات",
+      icon: "Calendar",
+      disabled: true,
+    },
+    {
+      id: "notifications",
+      label: "اطلاعیه‌ها",
+      icon: "Bell",
+      disabled: true,
+    },
+    { id: "settings", label: "تنظیمات", icon: "Settings", disabled: true },
   ];
 
   return (
     <aside className={`sidebar${sidebarOpen ? "" : " is-collapsed"}`}>
       <div className="sidebar-head">
-        <div className="wordmark wordmark-sm">
-          <span className="wm-elmo">ELMO</span>
-          <span className="wm-c1">C</span>
-          <span className="wm-p">P</span>
-          <span className="wm-c2">C</span>
-          <span className="wm-year"> 2025</span>
+        <div className="sidebar-head-row">
+          <div className="wordmark wordmark-sm">
+            <span className="wm-elmo">ELMO</span>
+            <span className="wm-c1">C</span>
+            <span className="wm-p">P</span>
+            <span className="wm-c2">C</span>
+            <span className="wm-year"> 2026</span>
+          </div>
+          <button
+            type="button"
+            className="icon-btn sidebar-toggle"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? "کوچک کردن منو" : "باز کردن منو"}
+            aria-expanded={sidebarOpen}
+          >
+            <ChevronLeft
+              className={`icon${sidebarOpen ? " rotate-180" : ""}`}
+              aria-hidden="true"
+            />
+          </button>
         </div>
-        <p className="sidebar-sub">Dashboard</p>
       </div>
 
       <nav className="sidebar-nav" aria-label="بخش‌های داشبورد">
@@ -47,9 +70,10 @@ const Sidebar = ({
             icon={item.icon}
             activeTab={activeTab}
             sidebarOpen={sidebarOpen}
+            disabled={item.disabled}
             onClick={() => {
               setActiveTab(item.id);
-              if (window.innerWidth < 768) setSidebarOpen(false);
+              if (window.innerWidth <= 900) setSidebarOpen(false);
             }}
           />
         ))}

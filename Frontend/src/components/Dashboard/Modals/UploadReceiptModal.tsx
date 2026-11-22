@@ -1,7 +1,6 @@
 // src/pages/Dashboard/components/Modals/UploadReceiptModal.tsx
 import { useState, useCallback } from "react";
 import { Upload, Receipt } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import BaseModal from "./BaseModal.tsx";
 
 interface UploadReceiptModalProps {
@@ -72,70 +71,74 @@ const UploadReceiptModal = ({
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} maxWidth="max-w-md">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
-          <Upload className="w-6 h-6 text-orange-400" />
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      showHeader
+      title="آپلود فیش پرداخت"
+      icon={<Upload className="icon" />}
+      footer={
+        <>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={onClose}
+            disabled={uploading}
+          >
+            انصراف
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleUpload}
+            disabled={!selectedFile || uploading}
+          >
+            {uploading ? "در حال آپلود..." : "آپلود فایل"}
+          </button>
+        </>
+      }
+    >
+      <div className="payment-grid">
+        <div className="payment-cell">
+          <p className="payment-label">مبلغ قابل پرداخت</p>
+          <p className="payment-amount">
+            {formatPrice(paymentInfo.ticketPrice)}
+          </p>
         </div>
-        <h3 className="text-lg font-bold text-white">آپلود فیش پرداخت</h3>
-      </div>
-
-      <div className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="bg-white/5 rounded-lg p-4">
-            <p className="text-gray-400 text-sm mb-1">مبلغ قابل پرداخت</p>
-            <p className="text-lg font-bold text-[#FFD500]">
-              {formatPrice(paymentInfo.ticketPrice)}
-            </p>
-          </div>
-          <div className="bg-white/5 rounded-lg p-4">
-            <p className="text-gray-400 text-sm mb-1">شماره کارت</p>
-            <p
-              className="text-lg font-bold text-green-400 font-mono text-right"
-              dir="ltr"
-            >
-              {paymentInfo.cardNumber}
-            </p>
-            <p className="text-gray-400 text-xs mt-1">{paymentInfo.bankName}</p>
-          </div>
+        <div className="payment-cell">
+          <p className="payment-label">شماره کارت</p>
+          <p className="payment-number" dir="ltr">
+            {paymentInfo.cardNumber}
+          </p>
+          <p className="payment-bank">{paymentInfo.bankName}</p>
         </div>
       </div>
 
       <div
-        onDragEnter={(e) => {
-          e.preventDefault();
+        onDragEnter={(event) => {
+          event.preventDefault();
           setIsDragging(true);
         }}
-        onDragOver={(e) => e.preventDefault()}
+        onDragOver={(event) => event.preventDefault()}
         onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
+        onDrop={(event) => {
+          event.preventDefault();
           setIsDragging(false);
-          const file = e.dataTransfer.files?.[0];
+          const file = event.dataTransfer.files?.[0];
           if (file) handleFileSelect(file);
         }}
-        className={`
-          border-2 border-dashed rounded-xl p-6 min-h-[200px] 
-          flex flex-col items-center justify-center cursor-pointer transition
-          ${
-            isDragging
-              ? "border-orange-400 bg-orange-500/10"
-              : "border-orange-500/30"
-          }
-        `}
+        className={`dropzone${isDragging ? " is-dragging" : ""}`}
         onClick={() => document.getElementById("receipt-input")?.click()}
       >
-        <Receipt className="w-12 h-12 text-orange-400 mb-3" />
+        <Receipt className="icon-lg" aria-hidden="true" />
 
         {!selectedFile ? (
           <>
-            <p className="text-gray-200 mb-1">فایل را اینجا رها کنید</p>
-            <p className="text-sm text-gray-400">یا کلیک کنید برای انتخاب</p>
+            <p>فایل را اینجا رها کنید</p>
+            <p className="small text-muted">یا کلیک کنید برای انتخاب</p>
           </>
         ) : (
-          <p className="text-green-300 font-medium">
-            {selectedFile.name} انتخاب شد ✔
-          </p>
+          <p className="text-success">{selectedFile.name} انتخاب شد</p>
         )}
 
         <input
@@ -143,41 +146,16 @@ const UploadReceiptModal = ({
           type="file"
           accept=".jpg,.jpeg,.png,.pdf"
           className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
+          onChange={(event) => {
+            const file = event.target.files?.[0];
             if (file) handleFileSelect(file);
           }}
         />
       </div>
 
-      <div className="text-xs text-gray-400 mt-4 mb-6 text-center leading-relaxed">
-        <p>فرمت‌های قابل قبول: JPG, PNG, PDF</p>
-        <p>حداکثر حجم: 5MB</p>
-      </div>
-
-      <div className="flex gap-3">
-        <Button
-          onClick={onClose}
-          className="flex-1 bg-white/10 hover:bg-white/20 text-white"
-          disabled={uploading}
-        >
-          انصراف
-        </Button>
-
-        <Button
-          onClick={handleUpload}
-          className="flex-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30"
-          disabled={!selectedFile || uploading}
-        >
-          {uploading ? (
-            <>
-              <div className="w-4 h-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin ml-2" />
-              در حال آپلود...
-            </>
-          ) : (
-            "آپلود فایل"
-          )}
-        </Button>
+      <div className="text-center">
+        <p className="small text-muted">فرمت‌های قابل قبول: JPG, PNG, PDF</p>
+        <p className="small text-muted">حداکثر حجم: 5MB</p>
       </div>
     </BaseModal>
   );

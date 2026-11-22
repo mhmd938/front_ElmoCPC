@@ -68,7 +68,6 @@ function AdminTeamsApproval() {
     id: number;
     teamName: string;
     teamId?: number; // اضافه کردن teamId
-    approved?: boolean;
   } | null>(null);
   const [verificationNotes, setVerificationNotes] = useState("");
   const [pendingReceipts, setPendingReceipts] = useState<Receipt[]>([]);
@@ -366,7 +365,7 @@ function AdminTeamsApproval() {
   }
 
   return (
-    <div dir="rtl">
+    <div className="admin-page" dir="rtl">
       {/* Sidebar */}
       <aside className={`sidebar${!sidebarOpen ? " is-collapsed" : ""}`}>
         <div className="sidebar-head">
@@ -375,7 +374,7 @@ function AdminTeamsApproval() {
             <span className="wm-c1">C</span>
             <span className="wm-p">P</span>
             <span className="wm-c2">C</span>
-            <span className="wm-year"> 2025</span>
+            <span className="wm-year"> 2026</span>
           </div>
           <p className="sidebar-title">پنل مدیریت</p>
           <p className="sidebar-sub">سیستم مدیریت تیم‌ها و کاربران</p>
@@ -562,7 +561,7 @@ function AdminTeamsApproval() {
                 <button
                   key={status.value}
                   type="button"
-                  className={`chip${
+                  className={`chip ${status.value === "all" ? "is-all" : statusConfig[status.value].pillClass}${
                     filterStatus === status.value ? " is-active" : ""
                   }`}
                   onClick={() => setFilterStatus(status.value)}
@@ -607,7 +606,7 @@ function AdminTeamsApproval() {
                   const statusMsg = getStatusMessage(team.status);
 
                   return (
-                    <article className="card stack" key={team.id}>
+                    <article className={`card stack review-card ${statusConfig[team.status].pillClass}`} key={team.id}>
                       <div className="team-card-head">
                         <div className="stack">
                           <div className="row">
@@ -973,8 +972,7 @@ function AdminTeamsApproval() {
               </div>
 
               <p className="card-text">
-                آیا از {selectedReceipt.approved ? "تایید" : "رد"} فیش پرداخت
-                تیم
+                آیا از تایید یا رد فیش پرداخت تیم
                 <span className="text-highlight">
                   {" "}
                   {selectedReceipt.teamName}{" "}
