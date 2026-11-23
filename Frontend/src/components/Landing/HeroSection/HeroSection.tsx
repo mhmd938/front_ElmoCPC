@@ -3,6 +3,7 @@ import { Users, Clock, Award } from "lucide-react";
 import cesa from "@/assets/CESA.svg";
 import CountdownTimer from "./CountdownTimer";
 import CTAButtons from "./CTAButtons";
+import HeroSlingshot from "./HeroSlingshot";
 
 interface HeroSectionProps {
   countdown: {
@@ -69,6 +70,7 @@ const HeroSection = ({
             جوایز نقدی و هدیه های دیگر
           </li>
         </ul>
+        <HeroSlingshot />
       </div>
     </section>
   );
