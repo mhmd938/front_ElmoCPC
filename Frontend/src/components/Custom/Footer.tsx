@@ -1,10 +1,15 @@
 ﻿import { Mail, Instagram, Send } from "lucide-react";
+import type { ReactNode } from "react";
 import cesa from "@/assets/CESA.svg";
 import uni from "@/assets/UNi.png";
 import elmocpc from "@/assets/ELMOCPC.svg";
 import extraLogo from "@/assets/yektanet.svg";
 
-const Footer = () => {
+type FooterProps = {
+  credits?: ReactNode;
+};
+
+const Footer = ({ credits }: FooterProps) => {
   return (
     <footer className="footer" id="contact">
       <div className="footer-inner">
@@ -45,6 +50,7 @@ const Footer = () => {
         <div className="footer-copy">
           <p>ELMOCPC 2026 © - تمامی حقوق محفوظ است</p>
           <p>ELMOCPC - Computer Engineering Scientific Associate</p>
+          {credits}
         </div>
       </div>
     </footer>
