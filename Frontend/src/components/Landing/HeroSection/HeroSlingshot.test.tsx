@@ -1,13 +1,8 @@
 import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import duckSprite from "@/assets/hero-birds/duck.svg";
 import HeroSection from "./HeroSection";
 
-type ObserverInstance = {
-  target: Element | null;
-  notify: (isIntersecting: boolean) => void;
-};
-
-const observers: ObserverInstance[] = [];
 let frameCallbacks: Map<number, FrameRequestCallback>;
 let nextFrameId: number;
 let reducedMotion = false;
@@ -44,25 +39,21 @@ class MockIntersectionObserver implements IntersectionObserver {
 
   constructor(callback: IntersectionObserverCallback) {
     this.callback = callback;
-    observers.push({
-      get target() {
-        return thisObserver.target;
-      },
-      notify: (isIntersecting) => {
-        if (!this.target) throw new Error("Hero observer did not observe a target");
-        const entry = {
-          isIntersecting,
-          intersectionRatio: isIntersecting ? 1 : 0,
-          target: this.target,
-          time: 0,
-          rootBounds: null,
-          boundingClientRect: currentLayout,
-          intersectionRect: currentLayout,
-        } as IntersectionObserverEntry;
-        this.callback([entry], this);
-      },
-    });
-    const thisObserver = this;
+    observers.push(this);
+  }
+
+  notify(isIntersecting: boolean) {
+    if (!this.target) throw new Error("Hero observer did not observe a target");
+    const entry = {
+      isIntersecting,
+      intersectionRatio: isIntersecting ? 1 : 0,
+      target: this.target,
+      time: 0,
+      rootBounds: null,
+      boundingClientRect: currentLayout,
+      intersectionRect: currentLayout,
+    } as IntersectionObserverEntry;
+    this.callback([entry], this);
   }
 
   observe(target: Element) {
@@ -77,6 +68,8 @@ class MockIntersectionObserver implements IntersectionObserver {
     return [];
   }
 }
+
+const observers: MockIntersectionObserver[] = [];
 
 function setRandomSequence(...values: number[]) {
   const random = vi.spyOn(Math, "random");
@@ -136,6 +129,26 @@ function frame(timestamp: number) {
 
 function activeFlight(container: HTMLElement) {
   return container.querySelector<HTMLElement>(".hero-flight");
+}
+
+function rotatedBounds(element: HTMLElement) {
+  const size = Number.parseFloat(element.style.width);
+  const left = Number.parseFloat(element.style.left);
+  const top = Number.parseFloat(element.style.top);
+  const rotationDegrees = Number.parseFloat(
+    element.style.transform.match(/rotate\((-?\d+(?:\.\d+)?)deg\)/)?.[1] ?? "0",
+  );
+  const rotation = (Math.abs(rotationDegrees) * Math.PI) / 180;
+  const halfExtent = (size / 2) * (Math.cos(rotation) + Math.sin(rotation));
+  const centerX = left + size / 2;
+  const centerY = top + size / 2;
+
+  return {
+    left: centerX - halfExtent,
+    right: centerX + halfExtent,
+    top: centerY - halfExtent,
+    bottom: centerY + halfExtent,
+  };
 }
 
 beforeEach(() => {
@@ -221,14 +234,19 @@ afterEach(() => {
 
 describe("HeroSlingshot", () => {
   it.each([
-    ["left", "side", 0.1, 0.1],
-    ["left", "bottom", 0.1, 0.9],
-    ["right", "side", 0.9, 0.1],
-    ["right", "bottom", 0.9, 0.9],
-  ] as const)(
-    "flies from the physical %s and exits through the %s",
-    (entry, exit, entryRandom, exitRandom) => {
+    { entry: "left", exit: "side", entryRandom: 0.1, exitRandom: 0.1, width: 1152, height: 828 },
+    { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width: 1152, height: 828 },
+    { entry: "right", exit: "side", entryRandom: 0.9, exitRandom: 0.1, width: 1152, height: 828 },
+    { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width: 1152, height: 828 },
+    { entry: "left", exit: "side", entryRandom: 0.1, exitRandom: 0.1, width: 375, height: 780 },
+    { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width: 375, height: 780 },
+    { entry: "right", exit: "side", entryRandom: 0.9, exitRandom: 0.1, width: 375, height: 780 },
+    { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width: 375, height: 780 },
+  ])(
+    "flies from the physical $entry and exits through the $exit at $width×$height",
+    ({ entry, exit, entryRandom, exitRandom, width, height }) => {
       setRandomSequence(entryRandom, exitRandom, 0.1, 0.5, 0.5);
+      resizeOverlay(width, height);
       const { container } = renderHero();
       const heroInner = container.querySelector(".hero-inner");
       expect(heroInner?.lastElementChild).toHaveClass("hero-slingshot");
@@ -252,8 +270,9 @@ describe("HeroSlingshot", () => {
       if (entry === "left") {
         expect(initialX).toBeLessThanOrEqual(-spriteWidth);
       } else {
-        expect(initialX).toBe(1000);
+        expect(initialX).toBeGreaterThanOrEqual(width);
       }
+      const originBounds = rotatedBounds(flight!);
 
       frame(0);
       frame(100);
@@ -265,19 +284,23 @@ describe("HeroSlingshot", () => {
       );
       expect(movingY).toBeLessThan(initialY);
 
-      frame(1299);
+      frame(1260);
       const nearExit = activeFlight(container)!;
-      const exitX = Number.parseFloat(nearExit.style.left);
-      const exitY = Number.parseFloat(nearExit.style.top);
+      const bodyBounds = rotatedBounds(nearExit);
       if (exit === "side") {
-        if (entry === "left") expect(exitX).toBeGreaterThan(900);
-        else expect(exitX).toBeLessThan(100);
-        expect(exitY).toBeLessThan(500);
+        if (entry === "left") expect(bodyBounds.left).toBeGreaterThan(width);
+        else expect(bodyBounds.right).toBeLessThan(0);
+        expect(bodyBounds.top).toBeGreaterThan(0);
+        expect(bodyBounds.bottom).toBeLessThan(height);
       } else {
-        expect(exitY).toBeGreaterThan(500);
-        expect(exitX).toBeGreaterThan(0);
-        expect(exitX).toBeLessThan(1000 - spriteWidth);
+        expect(bodyBounds.top).toBeGreaterThan(height);
+        expect(bodyBounds.left).toBeGreaterThan(0);
+        expect(bodyBounds.right).toBeLessThan(width);
       }
+      if (entry === "left") expect(originBounds.right).toBeLessThanOrEqual(0);
+      else expect(originBounds.left).toBeGreaterThanOrEqual(width);
+      frame(1301);
+      expect(activeFlight(container)).toBeNull();
     },
   );
 
@@ -298,6 +321,24 @@ describe("HeroSlingshot", () => {
     expect(activeFlight(container)).not.toBeNull();
   });
 
+  it.each([
+    ["left", 0.1, 1],
+    ["right", 0.9, -1],
+  ] as const)("normalizes the left-facing duck for a %s-origin launch", (entry, entryRandom, direction) => {
+    setRandomSequence(entryRandom, 0.1, 0.99, 0.5, 0.5);
+    const { container } = renderHero();
+    activateHero();
+    advanceTimers(2000);
+
+    const flight = activeFlight(container)!;
+    const image = flight.querySelector("img")!;
+    expect(image).toHaveAttribute("src", duckSprite);
+    expect(image.style.transform).toBe("scaleX(-1)");
+    const wrapperDirection = flight.style.transform.startsWith("scaleX(-1)") ? -1 : 1;
+    expect(-1 * -1 * wrapperDirection).toBe(direction);
+    expect(flight).toHaveAttribute("data-entry", entry);
+  });
+
   it("uses the overlay's current physical dimensions when a launch starts", () => {
     setRandomSequence(0.9, 0.1, 0.1, 0.5, 0.5);
     const { container } = renderHero();
@@ -309,7 +350,7 @@ describe("HeroSlingshot", () => {
 
     const flight = activeFlight(container)!;
     expect(flight).toHaveAttribute("data-entry", "right");
-    expect(Number.parseFloat(flight.style.left)).toBe(500);
+    expect(rotatedBounds(flight).left).toBeGreaterThanOrEqual(500);
     expect(Number.parseFloat(flight.style.top)).toBeCloseTo(204, 10);
   });
 
@@ -327,8 +368,41 @@ describe("HeroSlingshot", () => {
     advanceTimers(1);
 
     const flight = activeFlight(container)!;
-    expect(Number.parseFloat(flight.style.left)).toBe(500);
+    expect(rotatedBounds(flight).left).toBeGreaterThanOrEqual(500);
     expect(Number.parseFloat(flight.style.top)).toBeCloseTo(204, 10);
+  });
+
+  it("does not queue another RAF when a later launch timer fires first", () => {
+    const { unmount } = renderHero();
+    activateHero();
+    advanceTimers(2000);
+    expect(frameCallbacks.size).toBe(1);
+    advanceTimers(4000);
+    expect(frameCallbacks.size).toBe(1);
+    unmount();
+    expect(frameCallbacks.size).toBe(0);
+  });
+
+  it("cancels the older pending RAF if a second launch fires before animation resumes", () => {
+    const { unmount } = renderHero();
+    activateHero();
+    advanceTimers(2000);
+    advanceTimers(4000);
+    unmount();
+    expect(frameCallbacks.size).toBe(0);
+  });
+
+  it("removes expired trail dots immediately when a stalled flight is replaced", () => {
+    const { container } = renderHero();
+    activateHero();
+    advanceTimers(2000);
+    frame(2000);
+    frame(2100);
+    expect(container.querySelectorAll(".hero-trail-dot").length).toBeGreaterThan(0);
+
+    advanceTimers(4000);
+    expect(activeFlight(container)).not.toBeNull();
+    expect(container.querySelectorAll(".hero-trail-dot")).toHaveLength(0);
   });
 
   it("clears the active bird and trail on exit and waits two seconds after re-entry", () => {

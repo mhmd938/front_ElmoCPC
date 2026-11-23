@@ -10,6 +10,7 @@ interface FlightPlan {
   entry: EntrySide;
   exit: ExitSide;
   image: string;
+  mirrorImage: boolean;
   size: number;
   durationMs: number;
   x0: number;
@@ -33,21 +34,31 @@ interface TrailDot {
   opacity: number;
 }
 
-const SPRITES = [birdSprite, owlSprite, duckSprite];
 const FIRST_LAUNCH_DELAY_MS = 2000;
 const MIN_LAUNCH_INTERVAL_MS = 3000;
 const LAUNCH_INTERVAL_RANGE_MS = 2000;
 const TRAIL_SAMPLE_INTERVAL_MS = 75;
 const TRAIL_LIFETIME_MS = 520;
 const MAX_TRAIL_DOTS = 14;
+const MAX_PITCH_DEGREES = 14;
+const TERMINAL_CLEARANCE_MS = 40;
+
+const SPRITES = [
+  { src: birdSprite, mirrorX: false },
+  { src: owlSprite, mirrorX: false },
+  { src: duckSprite, mirrorX: true },
+];
 
 function positionAt(plan: FlightPlan, elapsedMs: number) {
   const elapsedSeconds = elapsedMs / 1000;
   const y = plan.y0 + plan.vy * elapsedSeconds + 0.5 * plan.gravity * elapsedSeconds ** 2;
   const verticalVelocity = plan.vy + plan.gravity * elapsedSeconds;
   const pitch = Math.max(
-    -14,
-    Math.min(14, (Math.atan2(verticalVelocity, Math.abs(plan.vx)) * 180) / Math.PI),
+    -MAX_PITCH_DEGREES,
+    Math.min(
+      MAX_PITCH_DEGREES,
+      (Math.atan2(verticalVelocity, Math.abs(plan.vx)) * 180) / Math.PI,
+    ),
   );
 
   return {
@@ -60,29 +71,35 @@ function positionAt(plan: FlightPlan, elapsedMs: number) {
 function createFlight(width: number, height: number): FlightPlan {
   const entry: EntrySide = Math.random() < 0.5 ? "left" : "right";
   const exit: ExitSide = Math.random() < 0.5 ? "side" : "bottom";
-  const image = SPRITES[Math.floor(Math.random() * SPRITES.length)] ?? birdSprite;
+  const sprite = SPRITES[Math.floor(Math.random() * SPRITES.length)] ?? SPRITES[0];
   const durationMs = 1100 + Math.random() * 400;
-  const durationSeconds = durationMs / 1000;
+  const routeDurationSeconds = (durationMs - TERMINAL_CLEARANCE_MS) / 1000;
   const size = Math.min(64, Math.max(44, Math.min(width, height) * 0.12));
-  const x0 = entry === "left" ? -size : width;
+  const maxPitchRadians = (MAX_PITCH_DEGREES * Math.PI) / 180;
+  const rotationClearance =
+    (size / 2) * (Math.cos(maxPitchRadians) + Math.sin(maxPitchRadians) - 1) + 1;
+  const x0 = entry === "left" ? -size - rotationClearance : width + rotationClearance;
   const y0 = height * 0.68;
-  const gravity = (1.4 * height) / durationSeconds ** 2;
-  const targetY = exit === "side" ? height * 0.34 : height;
+  const gravity = (1.4 * height) / routeDurationSeconds ** 2;
+  const targetY = exit === "side" ? height * 0.34 : height + rotationClearance;
+  // The route clears the rotated body at this point, then remains offscreen for the final 40 ms.
   const targetX =
     exit === "side"
       ? entry === "left"
-        ? width
-        : -size
+        ? width + rotationClearance
+        : -size - rotationClearance
       : entry === "left"
         ? width * 0.52 - size
         : width * 0.48;
-  const vx = (targetX - x0) / durationSeconds;
-  const vy = (targetY - y0 - 0.5 * gravity * durationSeconds ** 2) / durationSeconds;
+  const vx = (targetX - x0) / routeDurationSeconds;
+  const vy =
+    (targetY - y0 - 0.5 * gravity * routeDurationSeconds ** 2) / routeDurationSeconds;
 
   return {
     entry,
     exit,
-    image,
+    image: sprite.src,
+    mirrorImage: sprite.mirrorX,
     size,
     durationMs,
     x0,
@@ -206,15 +223,27 @@ const HeroSlingshot = () => {
 
       if (dots.length > 0) shouldContinue = true;
       if (shouldContinue) {
-        animationFrame = window.requestAnimationFrame(animate);
-      } else {
-        animationFrame = undefined;
+        scheduleFrame();
       }
+    };
+
+    const scheduleFrame = () => {
+      if (disposed || animationFrame !== undefined) return;
+      animationFrame = window.requestAnimationFrame((timestamp) => {
+        animationFrame = undefined;
+        animate(timestamp);
+      });
     };
 
     const launch = () => {
       launchTimeout = undefined;
       if (disposed) return;
+
+      activePlan = null;
+      startedAt = null;
+      dots = [];
+      setFlightView(null);
+      setTrailDots([]);
 
       const bounds = layer.getBoundingClientRect();
       const width = layer.clientWidth || bounds.width;
@@ -225,7 +254,7 @@ const HeroSlingshot = () => {
         startedAt = null;
         nextTrailSampleAt = TRAIL_SAMPLE_INTERVAL_MS;
         setFlightView({ ...plan, ...positionAt(plan, 0) });
-        animationFrame = window.requestAnimationFrame(animate);
+        scheduleFrame();
       }
 
       const interval =
@@ -280,6 +309,7 @@ const HeroSlingshot = () => {
             height={flightView.size}
             alt=""
             draggable={false}
+            style={flightView.mirrorImage ? { transform: "scaleX(-1)" } : undefined}
           />
         </span>
       )}
