@@ -233,11 +233,57 @@ afterEach(() => {
 });
 
 describe("HeroSlingshot", () => {
+  it("varies entry height and path length for the same route, sprite, and duration", () => {
+    const launch = (pathRandom: number) => {
+      setRandomSequence(0.1, 0.1, 0.1, 0.5, pathRandom, pathRandom);
+      const { container, unmount } = renderHero();
+      activateHero();
+      advanceTimers(2000);
+      const initialY = Number.parseFloat(activeFlight(container)!.style.top);
+      let previous = { x: Number.parseFloat(activeFlight(container)!.style.left), y: initialY };
+      let distance = 0;
+      let midY = initialY;
+      for (let timestamp = 0; timestamp <= 1000; timestamp += 100) {
+        frame(timestamp);
+        const flight = activeFlight(container)!;
+        const current = {
+          x: Number.parseFloat(flight.style.left),
+          y: Number.parseFloat(flight.style.top),
+        };
+        distance += Math.hypot(current.x - previous.x, current.y - previous.y);
+        previous = current;
+        if (timestamp === 500) midY = current.y;
+      }
+      unmount();
+      return { initialY, midY, distance };
+    };
+
+    const shallow = launch(0.1);
+    const steep = launch(0.9);
+    expect(Math.abs(shallow.initialY - steep.initialY)).toBeGreaterThan(40);
+    expect(Math.abs(shallow.midY - steep.midY)).toBeGreaterThan(10);
+    expect(Math.abs(shallow.distance - steep.distance)).toBeGreaterThan(10);
+  });
+
+  it("starts upward at the shortest tablet-height bottom-route extrema", () => {
+    setRandomSequence(0.9, 0.9, 0.1, 0.5, 0, 0, 0.5);
+    resizeOverlay(1152, 701);
+    const { container } = renderHero();
+    activateHero();
+    advanceTimers(2000);
+    const initialY = Number.parseFloat(activeFlight(container)!.style.top);
+    frame(0);
+    frame(100);
+    expect(activeFlight(container)).toHaveAttribute("data-exit", "bottom");
+    expect(Number.parseFloat(activeFlight(container)!.style.top)).toBeLessThan(initialY);
+  });
+
   it.each([
     { entry: "left", exit: "side", entryRandom: 0.1, exitRandom: 0.1, width: 1152, height: 828 },
     { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width: 1152, height: 828 },
     { entry: "right", exit: "side", entryRandom: 0.9, exitRandom: 0.1, width: 1152, height: 828 },
     { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width: 1152, height: 828 },
+    { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width: 1152, height: 701 },
     { entry: "left", exit: "side", entryRandom: 0.1, exitRandom: 0.1, width: 375, height: 780 },
     { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width: 375, height: 780 },
     { entry: "right", exit: "side", entryRandom: 0.9, exitRandom: 0.1, width: 375, height: 780 },
@@ -351,7 +397,7 @@ describe("HeroSlingshot", () => {
     const flight = activeFlight(container)!;
     expect(flight).toHaveAttribute("data-entry", "right");
     expect(rotatedBounds(flight).left).toBeGreaterThanOrEqual(500);
-    expect(Number.parseFloat(flight.style.top)).toBeCloseTo(204, 10);
+    expect(Number.parseFloat(flight.style.top)).toBeCloseTo(198, 10);
   });
 
   it("keeps scheduling after a zero-size measurement and fits a later launch", () => {
@@ -369,7 +415,7 @@ describe("HeroSlingshot", () => {
 
     const flight = activeFlight(container)!;
     expect(rotatedBounds(flight).left).toBeGreaterThanOrEqual(500);
-    expect(Number.parseFloat(flight.style.top)).toBeCloseTo(204, 10);
+    expect(Number.parseFloat(flight.style.top)).toBeCloseTo(198, 10);
   });
 
   it("does not queue another RAF when a later launch timer fires first", () => {

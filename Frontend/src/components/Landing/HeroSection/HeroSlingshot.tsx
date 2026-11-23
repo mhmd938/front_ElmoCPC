@@ -79,9 +79,14 @@ function createFlight(width: number, height: number): FlightPlan {
   const rotationClearance =
     (size / 2) * (Math.cos(maxPitchRadians) + Math.sin(maxPitchRadians) - 1) + 1;
   const x0 = entry === "left" ? -size - rotationClearance : width + rotationClearance;
-  const y0 = height * 0.68;
-  const gravity = (1.4 * height) / routeDurationSeconds ** 2;
-  const targetY = exit === "side" ? height * 0.34 : height + rotationClearance;
+  const y0 = height * (0.56 + Math.random() * 0.2);
+  const trajectoryVariation = Math.random();
+  const targetY =
+    exit === "side"
+      ? height * (0.24 + Math.random() * 0.2)
+      : height + rotationClearance;
+  const gravity =
+    ((1.05 + trajectoryVariation * 0.55) * height) / routeDurationSeconds ** 2;
   // The route clears the rotated body at this point, then remains offscreen for the final 40 ms.
   const targetX =
     exit === "side"
@@ -89,8 +94,8 @@ function createFlight(width: number, height: number): FlightPlan {
         ? width + rotationClearance
         : -size - rotationClearance
       : entry === "left"
-        ? width * 0.52 - size
-        : width * 0.48;
+        ? width * (0.38 + Math.random() * 0.24) - size
+        : width * (0.62 - Math.random() * 0.24);
   const vx = (targetX - x0) / routeDurationSeconds;
   const vy =
     (targetY - y0 - 0.5 * gravity * routeDurationSeconds ** 2) / routeDurationSeconds;
