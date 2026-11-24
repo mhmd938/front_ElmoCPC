@@ -1,6 +1,7 @@
 import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import duckSprite from "@/assets/hero-birds/duck.svg";
+import firstSprite from "@/assets/birds/Gemini_Generated_Image_4741by4741by4741.svg?url";
+import secondSprite from "@/assets/birds/Gemini_Generated_Image_avun9mavun9mavun.svg?url";
 import HeroSection from "./HeroSection";
 
 let frameCallbacks: Map<number, FrameRequestCallback>;
@@ -233,6 +234,18 @@ afterEach(() => {
 });
 
 describe("HeroSlingshot", () => {
+  it.each([
+    [0, firstSprite],
+    [0.12, secondSprite],
+  ])("selects the pool sprite at the deterministic random draw %s", (spriteDraw, expectedSprite) => {
+    setRandomSequence(0.1, 0.1, spriteDraw, 0.5);
+    const { container } = renderHero();
+    activateHero();
+    advanceTimers(2000);
+
+    expect(activeFlight(container)?.querySelector("img")).toHaveAttribute("src", expectedSprite);
+  });
+
   it("varies entry height and path length for the same route, sprite, and duration", () => {
     const launch = (pathRandom: number) => {
       setRandomSequence(0.1, 0.1, 0.1, 0.5, pathRandom, pathRandom);
@@ -370,18 +383,18 @@ describe("HeroSlingshot", () => {
   it.each([
     ["left", 0.1, 1],
     ["right", 0.9, -1],
-  ] as const)("normalizes the left-facing duck for a %s-origin launch", (entry, entryRandom, direction) => {
-    setRandomSequence(entryRandom, 0.1, 0.99, 0.5, 0.5);
+  ] as const)("faces the selected sprite toward travel for a %s-origin launch", (entry, entryRandom, direction) => {
+    setRandomSequence(entryRandom, 0.1, 0.12, 0.5, 0.5);
     const { container } = renderHero();
     activateHero();
     advanceTimers(2000);
 
     const flight = activeFlight(container)!;
     const image = flight.querySelector("img")!;
-    expect(image).toHaveAttribute("src", duckSprite);
-    expect(image.style.transform).toBe("scaleX(-1)");
+    expect(image).toHaveAttribute("src", secondSprite);
+    expect(image.style.transform).toBe("");
     const wrapperDirection = flight.style.transform.startsWith("scaleX(-1)") ? -1 : 1;
-    expect(-1 * -1 * wrapperDirection).toBe(direction);
+    expect(wrapperDirection).toBe(direction);
     expect(flight).toHaveAttribute("data-entry", entry);
   });
 

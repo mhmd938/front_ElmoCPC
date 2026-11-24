@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import birdSprite from "@/assets/hero-birds/bird.svg";
-import owlSprite from "@/assets/hero-birds/owl.svg";
-import duckSprite from "@/assets/hero-birds/duck.svg";
+import sprite4741 from "@/assets/birds/Gemini_Generated_Image_4741by4741by4741.svg?url";
+import spriteAvun from "@/assets/birds/Gemini_Generated_Image_avun9mavun9mavun.svg?url";
+import spriteBci5 from "@/assets/birds/Gemini_Generated_Image_bci5jqbci5jqbci5.svg?url";
+import spriteBhp3 from "@/assets/birds/Gemini_Generated_Image_bhp3dzbhp3dzbhp3.svg?url";
+import spriteCw7 from "@/assets/birds/Gemini_Generated_Image_cw7c03cw7c03cw7c.svg?url";
+import spritePau1 from "@/assets/birds/Gemini_Generated_Image_pau1g8pau1g8pau1.svg?url";
+import spriteRhk8 from "@/assets/birds/Gemini_Generated_Image_rhk8q6rhk8q6rhk8.svg?url";
+import spriteVkg4 from "@/assets/birds/Gemini_Generated_Image_vkg4fnvkg4fnvkg4.svg?url";
+import spriteWzn7 from "@/assets/birds/Gemini_Generated_Image_wzn7k4wzn7k4wzn7.svg?url";
 
 type EntrySide = "left" | "right";
 type ExitSide = "side" | "bottom";
@@ -10,7 +16,6 @@ interface FlightPlan {
   entry: EntrySide;
   exit: ExitSide;
   image: string;
-  mirrorImage: boolean;
   size: number;
   durationMs: number;
   x0: number;
@@ -44,9 +49,15 @@ const MAX_PITCH_DEGREES = 14;
 const TERMINAL_CLEARANCE_MS = 40;
 
 const SPRITES = [
-  { src: birdSprite, mirrorX: false },
-  { src: owlSprite, mirrorX: false },
-  { src: duckSprite, mirrorX: true },
+  sprite4741,
+  spriteAvun,
+  spriteBci5,
+  spriteBhp3,
+  spriteCw7,
+  spritePau1,
+  spriteRhk8,
+  spriteVkg4,
+  spriteWzn7,
 ];
 
 function positionAt(plan: FlightPlan, elapsedMs: number) {
@@ -103,8 +114,7 @@ function createFlight(width: number, height: number): FlightPlan {
   return {
     entry,
     exit,
-    image: sprite.src,
-    mirrorImage: sprite.mirrorX,
+    image: sprite,
     size,
     durationMs,
     x0,
@@ -314,7 +324,6 @@ const HeroSlingshot = () => {
             height={flightView.size}
             alt=""
             draggable={false}
-            style={flightView.mirrorImage ? { transform: "scaleX(-1)" } : undefined}
           />
         </span>
       )}
