@@ -25,6 +25,7 @@ interface FlightPlan {
 }
 
 interface FlightView extends FlightPlan {
+  id: number;
   x: number;
   y: number;
   pitch: number;
@@ -32,6 +33,7 @@ interface FlightView extends FlightPlan {
 
 interface TrailDot {
   id: number;
+  flightId: number;
   x: number;
   y: number;
   createdAt: number;
@@ -41,11 +43,28 @@ interface TrailDot {
 const FIRST_LAUNCH_DELAY_MS = 2000;
 const MIN_LAUNCH_INTERVAL_MS = 3000;
 const LAUNCH_INTERVAL_RANGE_MS = 2000;
+const SHORT_LAUNCH_INTERVAL_MS = 550;
+const SHORT_LAUNCH_INTERVAL_RANGE_MS = 400;
 const TRAIL_SAMPLE_INTERVAL_MS = 75;
 const TRAIL_LIFETIME_MS = 520;
 const MAX_TRAIL_DOTS = 14;
 const MAX_PITCH_DEGREES = 14;
 const TERMINAL_CLEARANCE_MS = 40;
+
+interface ActiveFlight {
+  id: number;
+  plan: FlightPlan;
+  startedAt: number;
+  nextTrailSampleAt: number;
+}
+
+function getLaunchDelayMs() {
+  const shortGap = Math.random() < 0.25;
+  const spread = Math.random();
+  return shortGap
+    ? SHORT_LAUNCH_INTERVAL_MS + spread * SHORT_LAUNCH_INTERVAL_RANGE_MS
+    : MIN_LAUNCH_INTERVAL_MS + spread * LAUNCH_INTERVAL_RANGE_MS;
+}
 
 const SPRITES = [
   { image: spriteBlue, bmu: 75 },
@@ -146,7 +165,7 @@ const HeroSlingshot = () => {
     typeof document !== "undefined" && document.visibilityState === "visible",
   );
   const [isReducedMotion, setIsReducedMotion] = useState(false);
-  const [flightView, setFlightView] = useState<FlightView | null>(null);
+  const [flightViews, setFlightViews] = useState<FlightView[]>([]);
   const [trailDots, setTrailDots] = useState<TrailDot[]>([]);
 
   useEffect(() => {
@@ -189,7 +208,7 @@ const HeroSlingshot = () => {
 
   useEffect(() => {
     if (!canAnimate) {
-      setFlightView(null);
+      setFlightViews([]);
       setTrailDots([]);
       return;
     }
@@ -199,48 +218,51 @@ const HeroSlingshot = () => {
 
     let disposed = false;
     let nextDotId = 0;
+    let nextFlightId = 0;
     let launchTimeout: number | undefined;
     let animationFrame: number | undefined;
-    let activePlan: FlightPlan | null = null;
+    let activeFlights: ActiveFlight[] = [];
     let dots: TrailDot[] = [];
-    let startedAt: number | null = null;
-    let nextTrailSampleAt = TRAIL_SAMPLE_INTERVAL_MS;
 
     const animate = (timestamp: number) => {
       if (disposed) return;
 
-      let shouldContinue = false;
-      if (activePlan) {
-        const plan = activePlan;
-        if (startedAt === null) startedAt = timestamp;
-        const elapsedMs = Math.max(0, timestamp - startedAt);
+      const views: FlightView[] = [];
+      const remaining: ActiveFlight[] = [];
+      for (const flight of activeFlights) {
+        const { plan } = flight;
+        const elapsedMs = Math.max(0, timestamp - flight.startedAt);
         const trajectoryElapsedMs = Math.min(elapsedMs, plan.durationMs);
 
-        while (trajectoryElapsedMs >= nextTrailSampleAt) {
-          const sampleTime = Math.max(0, nextTrailSampleAt - TRAIL_SAMPLE_INTERVAL_MS);
+        while (trajectoryElapsedMs >= flight.nextTrailSampleAt) {
+          const sampleTime = Math.max(0, flight.nextTrailSampleAt - TRAIL_SAMPLE_INTERVAL_MS);
           const samplePosition = positionAt(plan, sampleTime);
           dots = [
             ...dots,
             {
               id: nextDotId++,
+              flightId: flight.id,
               x: samplePosition.x + plan.size / 2,
               y: samplePosition.y + plan.size / 2,
               createdAt: timestamp - (elapsedMs - sampleTime),
               opacity: 1,
             },
-          ].slice(-MAX_TRAIL_DOTS);
-          nextTrailSampleAt += TRAIL_SAMPLE_INTERVAL_MS;
+          ];
+          const flightDots = dots.filter((dot) => dot.flightId === flight.id);
+          if (flightDots.length > MAX_TRAIL_DOTS) {
+            const retainedIds = new Set(flightDots.slice(-MAX_TRAIL_DOTS).map((dot) => dot.id));
+            dots = dots.filter((dot) => dot.flightId !== flight.id || retainedIds.has(dot.id));
+          }
+          flight.nextTrailSampleAt += TRAIL_SAMPLE_INTERVAL_MS;
         }
 
-        if (elapsedMs >= plan.durationMs) {
-          activePlan = null;
-          startedAt = null;
-          setFlightView(null);
-        } else {
-          setFlightView({ ...plan, ...positionAt(plan, elapsedMs) });
-          shouldContinue = true;
+        if (elapsedMs < plan.durationMs) {
+          views.push({ id: flight.id, ...plan, ...positionAt(plan, elapsedMs) });
+          remaining.push(flight);
         }
       }
+      activeFlights = remaining;
+      setFlightViews(views);
 
       dots = dots
         .filter((dot) => timestamp - dot.createdAt < TRAIL_LIFETIME_MS)
@@ -250,7 +272,7 @@ const HeroSlingshot = () => {
         }));
       setTrailDots(dots);
 
-      if (dots.length > 0) shouldContinue = true;
+      const shouldContinue = activeFlights.length > 0 || dots.length > 0;
       if (shouldContinue) {
         scheduleFrame();
       }
@@ -268,27 +290,36 @@ const HeroSlingshot = () => {
       launchTimeout = undefined;
       if (disposed) return;
 
-      activePlan = null;
-      startedAt = null;
-      dots = [];
-      setFlightView(null);
-      setTrailDots([]);
-
       const bounds = layer.getBoundingClientRect();
+      const launchedAt = performance.now();
+      activeFlights = activeFlights.filter(
+        (flight) => launchedAt - flight.startedAt < flight.plan.durationMs + TRAIL_LIFETIME_MS,
+      );
+      dots = dots.filter((dot) => launchedAt - dot.createdAt < TRAIL_LIFETIME_MS);
       const width = layer.clientWidth || bounds.width;
       const height = layer.clientHeight || bounds.height;
       if (width > 0 && height > 0) {
         const plan = createFlight(width, height);
-        activePlan = plan;
-        startedAt = null;
-        nextTrailSampleAt = TRAIL_SAMPLE_INTERVAL_MS;
-        setFlightView({ ...plan, ...positionAt(plan, 0) });
+        const flight: ActiveFlight = {
+          id: nextFlightId++,
+          plan,
+          startedAt: launchedAt,
+          nextTrailSampleAt: TRAIL_SAMPLE_INTERVAL_MS,
+        };
+        activeFlights = [...activeFlights, flight];
         scheduleFrame();
       }
 
-      const interval =
-        MIN_LAUNCH_INTERVAL_MS + Math.random() * LAUNCH_INTERVAL_RANGE_MS;
-      launchTimeout = window.setTimeout(launch, interval);
+      const liveFlightViews = activeFlights.flatMap((flight) => {
+        const elapsedMs = Math.max(0, launchedAt - flight.startedAt);
+        return elapsedMs < flight.plan.durationMs
+          ? [{ id: flight.id, ...flight.plan, ...positionAt(flight.plan, elapsedMs) }]
+          : [];
+      });
+      setFlightViews(liveFlightViews);
+      setTrailDots(dots);
+
+      launchTimeout = window.setTimeout(launch, getLaunchDelayMs());
     };
 
     launchTimeout = window.setTimeout(launch, FIRST_LAUNCH_DELAY_MS);
@@ -297,7 +328,7 @@ const HeroSlingshot = () => {
       disposed = true;
       if (launchTimeout !== undefined) window.clearTimeout(launchTimeout);
       if (animationFrame !== undefined) window.cancelAnimationFrame(animationFrame);
-      activePlan = null;
+      activeFlights = [];
       dots = [];
     };
   }, [canAnimate]);
@@ -312,6 +343,7 @@ const HeroSlingshot = () => {
         <span
           key={dot.id}
           className="hero-trail-dot"
+          data-flight-id={dot.flightId}
           style={{
             left: `${dot.x}px`,
             top: `${dot.y}px`,
@@ -319,9 +351,11 @@ const HeroSlingshot = () => {
           }}
         />
       ))}
-      {flightView && (
+      {flightViews.map((flightView) => (
         <span
+          key={flightView.id}
           className="hero-flight"
+          data-flight-id={flightView.id}
           data-entry={flightView.entry}
           data-exit={flightView.exit}
           style={{
@@ -340,7 +374,7 @@ const HeroSlingshot = () => {
             draggable={false}
           />
         </span>
-      )}
+      ))}
     </div>
   );
 };

@@ -125,7 +125,8 @@ function advanceTimers(milliseconds: number) {
 function frame(timestamp: number) {
   const callbacks = [...frameCallbacks.entries()];
   for (const [id] of callbacks) frameCallbacks.delete(id);
-  act(() => callbacks.forEach(([, callback]) => callback(timestamp)));
+  // The first launch occurs at fake-time 2000; RAF timestamps share that clock.
+  act(() => callbacks.forEach(([, callback]) => callback(timestamp + 2000)));
 }
 
 function activeFlight(container: HTMLElement) {
@@ -154,6 +155,8 @@ function rotatedBounds(element: HTMLElement) {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  const fakeClockStart = Date.now();
+  vi.spyOn(performance, "now").mockImplementation(() => Date.now() - fakeClockStart);
   observers.length = 0;
   motionListeners.clear();
   currentLayout = createLayout(1000, 600);
@@ -351,7 +354,16 @@ describe("HeroSlingshot", () => {
       { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width, height: 780, targetRandom: 0 },
       { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width, height: 780, targetRandom: 1 },
     ]),
-  ])(
+  ] as Array<{
+    entry: string;
+    exit: string;
+    expectedExit?: string;
+    entryRandom: number;
+    exitRandom: number;
+    width: number;
+    height: number;
+    targetRandom?: number;
+  }>)(
     "flies from the physical $entry and exits through the $exit at $width×$height",
     ({ entry, exit, expectedExit = exit, entryRandom, exitRandom, width, height, targetRandom = 0.5 }) => {
       setRandomSequence(entryRandom, exitRandom, 0.55, 0.5, 0.5, 0.5, targetRandom);
@@ -478,7 +490,7 @@ describe("HeroSlingshot", () => {
   });
 
   it("keeps scheduling after a zero-size measurement and fits a later launch", () => {
-    setRandomSequence(0.5, 0.9, 0.1, 0.1, 0.5, 0.5);
+    setRandomSequence(0.5, 0.5, 0.9, 0.1, 0.1, 0.5, 0.5);
     resizeOverlay(0, 0);
     const { container } = renderHero();
     activateHero();
@@ -506,47 +518,94 @@ describe("HeroSlingshot", () => {
     expect(frameCallbacks.size).toBe(0);
   });
 
-  it("cancels the older pending RAF if a second launch fires before animation resumes", () => {
-    const { unmount } = renderHero();
+  it("starts a second copy without replacing the first flight", () => {
+    setRandomSequence(...Array.from({ length: 40 }, () => 0));
+    const { container, unmount } = renderHero();
     activateHero();
     advanceTimers(2000);
+    frame(0);
+    frame(500);
+    const first = activeFlight(container)!;
+    expect(first).toHaveAttribute("data-flight-id", "0");
+    advanceTimers(550);
+    frame(550);
+    const flights = [...container.querySelectorAll<HTMLElement>(".hero-flight")];
+    expect(flights).toHaveLength(2);
+    expect(flights[0]).toBe(first);
+    expect(flights[0].querySelector("img")?.src).toBe(flights[1].querySelector("img")?.src);
+    expect(flights[1]).toHaveAttribute("data-flight-id", "1");
+    frame(1200);
+    expect(container.querySelectorAll(".hero-flight")).toHaveLength(1);
+    expect(container.contains(first)).toBe(false);
     advanceTimers(4000);
     unmount();
     expect(frameCallbacks.size).toBe(0);
   });
 
-  it("removes expired trail dots immediately when a stalled flight is replaced", () => {
+  it("expires an older flight's trail while retaining the newer flight's trail", () => {
+    setRandomSequence(...Array.from({ length: 40 }, () => 0));
     const { container } = renderHero();
     activateHero();
     advanceTimers(2000);
-    frame(2000);
-    frame(2100);
-    expect(container.querySelectorAll(".hero-trail-dot").length).toBeGreaterThan(0);
+    frame(0);
+    frame(100);
+    advanceTimers(550);
+    frame(650);
+    frame(1500);
+    const oldFlightDots = container.querySelectorAll('.hero-trail-dot[data-flight-id="0"]');
+    const newFlightDots = container.querySelectorAll('.hero-trail-dot[data-flight-id="1"]');
+    expect(oldFlightDots).toHaveLength(0);
+    expect(newFlightDots.length).toBeGreaterThan(0);
+  });
 
+  it("samples live tail dots for both flights when RAF resumes after the first bird exits", () => {
+    setRandomSequence(...Array.from({ length: 40 }, () => 0));
+    const { container } = renderHero();
+    activateHero();
+    advanceTimers(3100);
+
+    frame(1400); // RAF resumes at 3400, after launches at 2000, 2550 and 3100.
+
+    const flights = [...container.querySelectorAll<HTMLElement>(".hero-flight")];
+    expect(flights.map((flight) => flight.dataset.flightId)).toEqual(["1", "2"]);
+    expect(container.querySelector('[data-flight-id="0"].hero-flight')).toBeNull();
+    expect(container.querySelectorAll('.hero-trail-dot[data-flight-id="0"]').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('.hero-trail-dot[data-flight-id="1"]').length).toBeGreaterThan(0);
+  });
+
+  it("does not render a stale flight or resurrect its expired trail when RAF resumes", () => {
+    setRandomSequence(...Array.from({ length: 7 }, () => 0), 0.5, 0.5);
+    const { container } = renderHero();
+    activateHero();
+    advanceTimers(2000);
+    expect(container.querySelectorAll(".hero-flight")).toHaveLength(1);
     advanceTimers(4000);
-    expect(activeFlight(container)).not.toBeNull();
+    expect(frameCallbacks.size).toBe(1);
+    frame(4000);
+
+    expect([...container.querySelectorAll<HTMLElement>(".hero-flight")].map((flight) => flight.dataset.flightId)).toEqual(["1"]);
     expect(container.querySelectorAll(".hero-trail-dot")).toHaveLength(0);
   });
 
   it("clears the active bird and trail on exit and waits two seconds after re-entry", () => {
-    setRandomSequence(0.1, 0.1, 0.1, 0.5, 0.5);
+    setRandomSequence(...Array.from({ length: 40 }, () => 0));
     const { container } = renderHero();
     activateHero();
 
     advanceTimers(2000);
-    frame(0);
-    frame(100);
-    expect(activeFlight(container)).not.toBeNull();
+    advanceTimers(550);
+    frame(650);
+    expect(container.querySelectorAll(".hero-flight")).toHaveLength(2);
     expect(container.querySelectorAll(".hero-trail-dot").length).toBeGreaterThan(0);
 
     const observer = observers.at(-1)!;
     act(() => observer.notify(false));
-    expect(activeFlight(container)).toBeNull();
+    expect(container.querySelectorAll(".hero-flight")).toHaveLength(0);
     expect(container.querySelectorAll(".hero-trail-dot")).toHaveLength(0);
     expect(frameCallbacks.size).toBe(0);
 
     advanceTimers(5000);
-    expect(activeFlight(container)).toBeNull();
+    expect(container.querySelectorAll(".hero-flight")).toHaveLength(0);
     act(() => observer.notify(true));
     advanceTimers(1999);
     expect(activeFlight(container)).toBeNull();
@@ -554,12 +613,15 @@ describe("HeroSlingshot", () => {
     expect(activeFlight(container)).not.toBeNull();
   });
 
-  it("cancels the scheduled launch and animation frame on unmount", () => {
-    const { unmount } = renderHero();
+  it("clears overlapping flights and trails on unmount", () => {
+    setRandomSequence(...Array.from({ length: 40 }, () => 0));
+    const { container, unmount } = renderHero();
     activateHero();
     advanceTimers(2000);
-    frame(0);
-    frame(100);
+    advanceTimers(550);
+    frame(650);
+    expect(container.querySelectorAll(".hero-flight")).toHaveLength(2);
+    expect(container.querySelectorAll(".hero-trail-dot").length).toBeGreaterThan(0);
     expect(frameCallbacks.size).toBe(1);
     expect(vi.getTimerCount()).toBe(1);
 
@@ -570,16 +632,16 @@ describe("HeroSlingshot", () => {
   });
 
   it.each(["hidden tab", "reduced motion"] as const)(
-    "suppresses launches, clears flight and trail, and restarts the delay when %s is enabled",
+    "suppresses launches, clears overlapping flights and trails, and restarts the delay when %s is enabled",
     (preference) => {
-      setRandomSequence(0.1, 0.1, 0.1, 0.5, 0.5);
+      setRandomSequence(...Array.from({ length: 40 }, () => 0));
       const { container } = renderHero();
       activateHero();
 
       advanceTimers(2000);
-      frame(0);
-      frame(100);
-      expect(activeFlight(container)).not.toBeNull();
+      advanceTimers(550);
+      frame(650);
+      expect(container.querySelectorAll(".hero-flight")).toHaveLength(2);
       expect(container.querySelectorAll(".hero-trail-dot").length).toBeGreaterThan(0);
 
       if (preference === "hidden tab") setVisibility("hidden");
