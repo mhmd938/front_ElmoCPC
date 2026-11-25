@@ -235,6 +235,24 @@ afterEach(() => {
 
 describe("HeroSlingshot", () => {
   it.each([
+    [0, 48, 36], [1, 86, 65], [2, 74, 55], [3, 90, 67],
+    [4, 134, 101], [5, 64, 48], [6, 58, 43], [7, 115, 86],
+  ])("sizes catalog entry %i at each hero width", (index, laptop, phone) => {
+    for (const [width, expected] of [[1366, laptop], [390, phone]]) {
+      resizeOverlay(width, 700);
+      setRandomSequence(0.1, 0.1, (index + 0.5) / 8);
+      const { container, unmount } = renderHero();
+      activateHero();
+      advanceTimers(2000);
+      expect(activeFlight(container)).toHaveStyle({
+        width: `${expected}px`,
+        height: `${expected}px`,
+      });
+      unmount();
+    }
+  });
+
+  it.each([
     [0, firstSprite],
     [0.2, secondSprite],
   ])("selects the pool sprite at the deterministic random draw %s", (spriteDraw, expectedSprite) => {
@@ -279,7 +297,7 @@ describe("HeroSlingshot", () => {
   });
 
   it("starts upward at the shortest tablet-height bottom-route extrema", () => {
-    setRandomSequence(0.9, 0.9, 0.1, 0.5, 0, 0, 0.5);
+    setRandomSequence(0.9, 0.9, 0.55, 0.5, 0, 0, 0.5);
     resizeOverlay(1152, 701);
     const { container } = renderHero();
     activateHero();
@@ -289,6 +307,29 @@ describe("HeroSlingshot", () => {
     frame(100);
     expect(activeFlight(container)).toHaveAttribute("data-exit", "bottom");
     expect(Number.parseFloat(activeFlight(container)!.style.top)).toBeLessThan(initialY);
+  });
+
+  it("keeps the Mighty Eagle inside the horizontal bounds at descending bottom contact", () => {
+    setRandomSequence(0.1, 0.9, 0.55, 0.99, 0.99, 0, 0);
+    resizeOverlay(320, 701);
+    const { container } = renderHero();
+    activateHero();
+    advanceTimers(2000);
+    expect(activeFlight(container)).toHaveAttribute("data-exit", "bottom");
+
+    let checkedContact = false;
+    for (let timestamp = 0; timestamp <= 1480; timestamp += 20) {
+      frame(timestamp);
+      const flight = activeFlight(container);
+      if (!flight) break;
+      const bounds = rotatedBounds(flight);
+      if (bounds.top <= 701 && bounds.bottom > 701) {
+        checkedContact = true;
+        expect(bounds.left).toBeGreaterThanOrEqual(0);
+        expect(bounds.right).toBeLessThanOrEqual(320);
+      }
+    }
+    expect(checkedContact).toBe(true);
   });
 
   it.each([
@@ -301,10 +342,19 @@ describe("HeroSlingshot", () => {
     { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width: 375, height: 780 },
     { entry: "right", exit: "side", entryRandom: 0.9, exitRandom: 0.1, width: 375, height: 780 },
     { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width: 375, height: 780 },
+    { entry: "left", exit: "bottom", expectedExit: "side", entryRandom: 0.1, exitRandom: 0.9, width: 120, height: 780, targetRandom: 0 },
+    ...[1366, 390, 320, 280, 180].flatMap((width) => [
+      { entry: "left", exit: "side", entryRandom: 0.1, exitRandom: 0.1, width, height: 780, targetRandom: 0.5 },
+      { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width, height: 780, targetRandom: 0 },
+      { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width, height: 780, targetRandom: 1 },
+      { entry: "right", exit: "side", entryRandom: 0.9, exitRandom: 0.1, width, height: 780, targetRandom: 0.5 },
+      { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width, height: 780, targetRandom: 0 },
+      { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width, height: 780, targetRandom: 1 },
+    ]),
   ])(
     "flies from the physical $entry and exits through the $exit at $width×$height",
-    ({ entry, exit, entryRandom, exitRandom, width, height }) => {
-      setRandomSequence(entryRandom, exitRandom, 0.1, 0.5, 0.5);
+    ({ entry, exit, expectedExit = exit, entryRandom, exitRandom, width, height, targetRandom = 0.5 }) => {
+      setRandomSequence(entryRandom, exitRandom, 0.55, 0.5, 0.5, 0.5, targetRandom);
       resizeOverlay(width, height);
       const { container } = renderHero();
       const hero = container.querySelector(".hero");
@@ -324,7 +374,7 @@ describe("HeroSlingshot", () => {
       const flight = activeFlight(container);
       expect(flight).not.toBeNull();
       expect(flight).toHaveAttribute("data-entry", entry);
-      expect(flight).toHaveAttribute("data-exit", exit);
+      expect(flight).toHaveAttribute("data-exit", expectedExit);
 
       const spriteWidth = Number.parseFloat(flight!.style.width);
       const initialX = Number.parseFloat(flight!.style.left);
@@ -346,10 +396,21 @@ describe("HeroSlingshot", () => {
       );
       expect(movingY).toBeLessThan(initialY);
 
+      if (expectedExit === "bottom") {
+        for (let timestamp = 120; timestamp <= 1260; timestamp += 20) {
+          frame(timestamp);
+          const bounds = rotatedBounds(activeFlight(container)!);
+          if (bounds.top <= height && bounds.bottom > height) {
+            expect(bounds.left).toBeGreaterThanOrEqual(0);
+            expect(bounds.right).toBeLessThanOrEqual(width);
+          }
+        }
+      }
+
       frame(1260);
       const nearExit = activeFlight(container)!;
       const bodyBounds = rotatedBounds(nearExit);
-      if (exit === "side") {
+      if (expectedExit === "side") {
         if (entry === "left") expect(bodyBounds.left).toBeGreaterThan(width);
         else expect(bodyBounds.right).toBeLessThan(0);
         expect(bodyBounds.top).toBeGreaterThan(0);

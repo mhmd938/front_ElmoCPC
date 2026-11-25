@@ -48,15 +48,15 @@ const MAX_PITCH_DEGREES = 14;
 const TERMINAL_CLEARANCE_MS = 40;
 
 const SPRITES = [
-  spriteBlue,
-  spriteBomb,
-  spriteChuck,
-  spriteMatilda,
-  spriteMightyEagle,
-  spriteRed,
-  spriteStella,
-  spriteTerence,
-];
+  { image: spriteBlue, bmu: 75 },
+  { image: spriteBomb, bmu: 135 },
+  { image: spriteChuck, bmu: 115 },
+  { image: spriteMatilda, bmu: 140 },
+  { image: spriteMightyEagle, bmu: 210 },
+  { image: spriteRed, bmu: 100 },
+  { image: spriteStella, bmu: 90 },
+  { image: spriteTerence, bmu: 180 },
+] as const;
 
 function positionAt(plan: FlightPlan, elapsedMs: number) {
   const elapsedSeconds = elapsedMs / 1000;
@@ -79,40 +79,56 @@ function positionAt(plan: FlightPlan, elapsedMs: number) {
 
 function createFlight(width: number, height: number): FlightPlan {
   const entry: EntrySide = Math.random() < 0.5 ? "left" : "right";
-  const exit: ExitSide = Math.random() < 0.5 ? "side" : "bottom";
+  let exit: ExitSide = Math.random() < 0.5 ? "side" : "bottom";
   const sprite = SPRITES[Math.floor(Math.random() * SPRITES.length)] ?? SPRITES[0];
   const durationMs = 1100 + Math.random() * 400;
   const routeDurationSeconds = (durationMs - TERMINAL_CLEARANCE_MS) / 1000;
-  const size = Math.min(64, Math.max(44, Math.min(width, height) * 0.12));
+  const redSize = width < 768 ? 48 : 64;
+  const size = Math.round((redSize * sprite.bmu) / 100);
   const maxPitchRadians = (MAX_PITCH_DEGREES * Math.PI) / 180;
-  const rotationClearance =
-    (size / 2) * (Math.cos(maxPitchRadians) + Math.sin(maxPitchRadians) - 1) + 1;
+  const rotatedHalfExtent = (size / 2) * (Math.cos(maxPitchRadians) + Math.sin(maxPitchRadians));
+  const rotationClearance = rotatedHalfExtent - size / 2 + 1;
   const x0 = entry === "left" ? -size - rotationClearance : width + rotationClearance;
   const y0 = height * (0.56 + Math.random() * 0.2);
   const trajectoryVariation = Math.random();
-  const targetY =
-    exit === "side"
-      ? height * (0.24 + Math.random() * 0.2)
-      : height + rotationClearance;
+  let targetY = exit === "side" ? height * (0.24 + Math.random() * 0.2) : height + rotationClearance;
   const gravity =
     ((1.05 + trajectoryVariation * 0.55) * height) / routeDurationSeconds ** 2;
   // The route clears the rotated body at this point, then remains offscreen for the final 40 ms.
-  const targetX =
-    exit === "side"
-      ? entry === "left"
-        ? width + rotationClearance
-        : -size - rotationClearance
-      : entry === "left"
-        ? width * (0.38 + Math.random() * 0.24) - size
-        : width * (0.62 - Math.random() * 0.24);
-  const vx = (targetX - x0) / routeDurationSeconds;
-  const vy =
+  const sideTargetX = entry === "left" ? width + rotationClearance : -size - rotationClearance;
+  const bottomTargetX = exit === "bottom"
+    ? entry === "left"
+      ? width * (0.38 + Math.random() * 0.24) - size
+      : width * (0.62 - Math.random() * 0.24)
+    : width / 2;
+  const minFittingX = rotatedHalfExtent - size / 2 + 1;
+  const maxFittingX = width - rotatedHalfExtent - size / 2 - 1;
+  let vy =
     (targetY - y0 - 0.5 * gravity * routeDurationSeconds ** 2) / routeDurationSeconds;
+  const overlapY = height - size / 2 - rotatedHalfExtent;
+  const discriminant = vy ** 2 - 2 * gravity * (y0 - overlapY);
+  const overlapTime = discriminant >= 0 ? (-vy + Math.sqrt(discriminant)) / gravity : Infinity;
+  const overlapProgress = overlapTime / routeDurationSeconds;
+  const launchSideLimit =
+    entry === "left"
+      ? (minFittingX - x0 * (1 - overlapProgress)) / overlapProgress
+      : (maxFittingX - x0 * (1 - overlapProgress)) / overlapProgress;
+  const minBottomX = entry === "left" ? Math.max(minFittingX, launchSideLimit) : minFittingX;
+  const maxBottomX = entry === "right" ? Math.min(maxFittingX, launchSideLimit) : maxFittingX;
+  if (exit === "bottom" && (overlapProgress <= 0 || overlapProgress > 1 || minBottomX > maxBottomX)) {
+    exit = "side";
+    targetY = height * 0.34;
+    vy = (targetY - y0 - 0.5 * gravity * routeDurationSeconds ** 2) / routeDurationSeconds;
+  }
+  const targetX = exit === "side"
+    ? sideTargetX
+    : Math.max(minBottomX, Math.min(maxBottomX, bottomTargetX));
+  const vx = (targetX - x0) / routeDurationSeconds;
 
   return {
     entry,
     exit,
-    image: sprite,
+    image: sprite.image,
     size,
     durationMs,
     x0,
