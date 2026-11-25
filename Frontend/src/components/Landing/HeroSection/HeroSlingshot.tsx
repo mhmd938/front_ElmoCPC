@@ -41,7 +41,7 @@ interface TrailDot {
 }
 
 const FIRST_LAUNCH_DELAY_MS = 2000;
-const MIN_LAUNCH_INTERVAL_MS = 3000;
+const MIN_LAUNCH_INTERVAL_MS = 1000;
 const LAUNCH_INTERVAL_RANGE_MS = 2000;
 const SHORT_LAUNCH_INTERVAL_MS = 550;
 const SHORT_LAUNCH_INTERVAL_RANGE_MS = 400;
@@ -72,7 +72,7 @@ const SPRITES = [
   { image: spriteChuck, bmu: 115 },
   { image: spriteMatilda, bmu: 140 },
   { image: spriteMightyEagle, bmu: 210 },
-  { image: spriteRed, bmu: 100 },
+  { image: spriteRed, bmu: 130 },
   { image: spriteStella, bmu: 90 },
   { image: spriteTerence, bmu: 180 },
 ] as const;

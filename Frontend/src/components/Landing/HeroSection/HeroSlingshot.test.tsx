@@ -239,7 +239,7 @@ afterEach(() => {
 describe("HeroSlingshot", () => {
   it.each([
     [0, 48, 36], [1, 86, 65], [2, 74, 55], [3, 90, 67],
-    [4, 134, 101], [5, 64, 48], [6, 58, 43], [7, 115, 86],
+    [4, 134, 101], [5, 83, 62], [6, 58, 43], [7, 115, 86],
   ])("sizes catalog entry %i at each hero width", (index, laptop, phone) => {
     for (const [width, expected] of [[1366, laptop], [390, phone]]) {
       resizeOverlay(width, 700);
@@ -439,7 +439,7 @@ describe("HeroSlingshot", () => {
     },
   );
 
-  it("starts each later launch three to five seconds after the previous launch starts", () => {
+  it("uses a regular one-to-three-second gap between later launches", () => {
     const { container } = renderHero();
     activateHero();
 
@@ -449,7 +449,7 @@ describe("HeroSlingshot", () => {
     frame(1301);
     expect(activeFlight(container)).toBeNull();
 
-    advanceTimers(3999);
+    advanceTimers(1999);
     frame(1700);
     expect(activeFlight(container)).toBeNull();
     advanceTimers(1);
@@ -498,7 +498,7 @@ describe("HeroSlingshot", () => {
     advanceTimers(2000);
     expect(activeFlight(container)).toBeNull();
     resizeOverlay(500, 300);
-    advanceTimers(3999);
+    advanceTimers(1999);
     expect(activeFlight(container)).toBeNull();
     advanceTimers(1);
 
@@ -574,14 +574,14 @@ describe("HeroSlingshot", () => {
   });
 
   it("does not render a stale flight or resurrect its expired trail when RAF resumes", () => {
-    setRandomSequence(...Array.from({ length: 7 }, () => 0), 0.5, 0.5);
+    setRandomSequence(...Array.from({ length: 7 }, () => 0), 0.75, 0.75);
     const { container } = renderHero();
     activateHero();
     advanceTimers(2000);
     expect(container.querySelectorAll(".hero-flight")).toHaveLength(1);
-    advanceTimers(4000);
+    advanceTimers(2500);
     expect(frameCallbacks.size).toBe(1);
-    frame(4000);
+    frame(2500);
 
     expect([...container.querySelectorAll<HTMLElement>(".hero-flight")].map((flight) => flight.dataset.flightId)).toEqual(["1"]);
     expect(container.querySelectorAll(".hero-trail-dot")).toHaveLength(0);
