@@ -70,8 +70,8 @@ const HeroSection = ({
             جوایز نقدی و هدیه های دیگر
           </li>
         </ul>
-        <HeroSlingshot />
       </div>
+      <HeroSlingshot />
     </section>
   );
 };

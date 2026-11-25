@@ -1,7 +1,7 @@
 import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import firstSprite from "@/assets/birds/Gemini_Generated_Image_4741by4741by4741.svg?url";
-import secondSprite from "@/assets/birds/Gemini_Generated_Image_avun9mavun9mavun.svg?url";
+import firstSprite from "@/assets/birds/blue.svg?url";
+import secondSprite from "@/assets/birds/bomb.svg?url";
 import HeroSection from "./HeroSection";
 
 let frameCallbacks: Map<number, FrameRequestCallback>;
@@ -236,7 +236,7 @@ afterEach(() => {
 describe("HeroSlingshot", () => {
   it.each([
     [0, firstSprite],
-    [0.12, secondSprite],
+    [0.2, secondSprite],
   ])("selects the pool sprite at the deterministic random draw %s", (spriteDraw, expectedSprite) => {
     setRandomSequence(0.1, 0.1, spriteDraw, 0.5);
     const { container } = renderHero();
@@ -307,10 +307,13 @@ describe("HeroSlingshot", () => {
       setRandomSequence(entryRandom, exitRandom, 0.1, 0.5, 0.5);
       resizeOverlay(width, height);
       const { container } = renderHero();
+      const hero = container.querySelector(".hero");
       const heroInner = container.querySelector(".hero-inner");
-      expect(heroInner?.lastElementChild).toHaveClass("hero-slingshot");
+      const overlay = hero?.lastElementChild;
+      expect(overlay).toHaveClass("hero-slingshot");
+      expect(overlay?.parentElement).toBe(hero);
+      expect(heroInner?.contains(overlay ?? null)).toBe(false);
 
-      const overlay = heroInner?.lastElementChild;
       expect(overlay).toHaveAttribute("aria-hidden", "true");
       activateHero();
 
@@ -384,7 +387,7 @@ describe("HeroSlingshot", () => {
     ["left", 0.1, 1],
     ["right", 0.9, -1],
   ] as const)("faces the selected sprite toward travel for a %s-origin launch", (entry, entryRandom, direction) => {
-    setRandomSequence(entryRandom, 0.1, 0.12, 0.5, 0.5);
+    setRandomSequence(entryRandom, 0.1, 0.2, 0.5, 0.5);
     const { container } = renderHero();
     activateHero();
     advanceTimers(2000);

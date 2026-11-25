@@ -96,6 +96,8 @@
 }
 
 .hero {
+  position: relative;
+  isolation: isolate;
   background:
     radial-gradient(circle, rgb(160 213 255 / 17%) 1px, transparent 1.5px) center / 28px 28px,
     radial-gradient(ellipse at 82% 15%, rgb(43 139 215 / 27%), transparent 60%),
@@ -105,13 +107,14 @@
 
 .hero-inner {
   position: relative;
+  z-index: 1;
   isolation: isolate;
   justify-content: center;
   gap: clamp(.65rem, 1.5vw, 1rem);
   padding-block: clamp(2rem, 6vh, 4.5rem);
 }
 
-.hero-inner > .hero-slingshot {
+.hero-slingshot {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -124,20 +127,20 @@
   z-index: 1;
 }
 
-.hero-inner .hero-flight {
+.hero-slingshot .hero-flight {
   position: absolute;
   display: block;
   will-change: left, top, transform;
 }
 
-.hero-inner .hero-flight > img {
+.hero-slingshot .hero-flight > img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.hero-inner .hero-trail-dot {
+.hero-slingshot .hero-trail-dot {
   position: absolute;
   width: .375rem;
   height: .375rem;
