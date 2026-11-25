@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import TeamStatusInfo from "../TeamStatusInfo";
 
@@ -132,5 +132,24 @@ describe("NotificationsList design classes", () => {
       "جدید"
     );
     expect(container.innerHTML).not.toMatch(/#FFD500|bg-white|text-gray/);
+  });
+
+  it("keeps the overview preview short and shows the full list in the announcements panel", () => {
+    const notifications = [
+      { id: 1, title: "اطلاعیه اول", message: "متن اول", type: "info" as const, date: "۱۴۰۴/۰۹/۰۱", read: true },
+      { id: 2, title: "اطلاعیه دوم", message: "متن دوم", type: "info" as const, date: "۱۴۰۴/۰۹/۰۲", read: true },
+      { id: 3, title: "اطلاعیه سوم", message: "متن سوم", type: "warning" as const, date: "۱۴۰۴/۰۹/۰۳", read: false },
+      { id: 4, title: "اطلاعیه چهارم", message: "متن چهارم", type: "success" as const, date: "۱۴۰۴/۰۹/۰۴", read: true },
+    ];
+    const { container, rerender } = render(<NotificationsList notifications={notifications} />);
+
+    expect(container.querySelectorAll(".list-row")).toHaveLength(3);
+    expect(screen.getByRole("heading", { name: "آخرین اطلاعیه‌ها" })).toBeInTheDocument();
+
+    rerender(<NotificationsList notifications={notifications} showAll />);
+
+    expect(container.querySelectorAll(".list-row")).toHaveLength(4);
+    expect(screen.getByRole("heading", { name: "اطلاعیه‌ها" })).toBeInTheDocument();
+    expect(screen.getByText("اطلاعیه چهارم")).toBeInTheDocument();
   });
 });

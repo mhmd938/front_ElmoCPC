@@ -1,6 +1,13 @@
 // src/pages/Dashboard/components/Sidebar/MenuItem.tsx
-import * as LucideIcons from "lucide-react";
-import { type LucideIcon } from "lucide-react";
+import { Bell, Calendar, Settings, User, Users, type LucideIcon } from "lucide-react";
+
+const iconsByName: Record<string, LucideIcon> = {
+  User,
+  Users,
+  Calendar,
+  Bell,
+  Settings,
+};
 
 interface MenuItemProps {
   id: string;
@@ -21,7 +28,7 @@ const MenuItem = ({
   onClick,
   disabled = false,
 }: MenuItemProps) => {
-  const IconComponent = (LucideIcons as any)[icon] as LucideIcon;
+  const IconComponent = iconsByName[icon] ?? User;
   const isActive = activeTab === id;
 
   return (
@@ -29,6 +36,7 @@ const MenuItem = ({
       type="button"
       onClick={disabled ? undefined : onClick}
       className={`sidebar-link${isActive ? " is-active" : ""}`}
+      aria-label={label}
       aria-current={isActive ? "page" : undefined}
       aria-disabled={disabled || undefined}
     >

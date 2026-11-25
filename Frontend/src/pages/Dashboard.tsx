@@ -11,6 +11,10 @@ import LoadingSpinner from "@/components/Dashboard/Common/LoadingSpinner";
 import DeleteTeamModal from "@/components/Dashboard/Modals/DeleteTeamModal";
 import UploadReceiptModal from "@/components/Dashboard/Modals/UploadReceiptModal";
 import SubmitTeamModal from "@/components/Dashboard/Modals/SubmitTeamModal";
+import ScheduleSection from "@/components/Dashboard/ScheduleSection";
+import SettingsSection from "@/components/Dashboard/SettingsSection";
+import NotificationsList from "@/components/Dashboard/OverviewSection/NotificationsList";
+import { dashboardTabs, type DashboardTabId } from "@/components/Dashboard/dashboardTabs";
 import { clearSession } from "@/services/authSession";
 
 const paymentInfo = {
@@ -22,7 +26,7 @@ const paymentInfo = {
 function Dashboard() {
   const navigate = useNavigate();
   const { authUser } = useUserStore();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<DashboardTabId>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const {
@@ -126,15 +130,14 @@ function Dashboard() {
             paymentInfo={paymentInfo}
           />
         );
-      // case "schedule":
-      //   return <ScheduleSection />;
-      // case "notifications":
-      //   return <NotificationsSection notifications={notifications} />;
-      // case "settings":
-      //   return <SettingsSection userData={userData} />;
-      // default:
-      //   return <OverviewSection {...overviewProps} />;
+      case "schedule":
+        return <ScheduleSection />;
+      case "notifications":
+        return <NotificationsList notifications={notifications} showAll />;
+      case "settings":
+        return <SettingsSection userData={userData} />;
     }
+    return null;
   };
 
   const activeContent = renderActiveTab();
@@ -159,28 +162,20 @@ function Dashboard() {
 
         <main className="app-main">
           <div className="tabs" role="tablist" aria-label="نمای داشبورد">
-            <button
-              type="button"
-              className={`tab${activeTab === "overview" ? " is-active" : ""}`}
-              role="tab"
-              id="tab-overview"
-              aria-selected={activeTab === "overview"}
-              aria-controls="panel-overview"
-              onClick={() => setActiveTab("overview")}
-            >
-              خانه
-            </button>
-            <button
-              type="button"
-              className={`tab${activeTab === "team" ? " is-active" : ""}`}
-              role="tab"
-              id="tab-team"
-              aria-selected={activeTab === "team"}
-              aria-controls="panel-team"
-              onClick={() => setActiveTab("team")}
-            >
-              تیم من
-            </button>
+            {dashboardTabs.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                className={`tab${activeTab === id ? " is-active" : ""}`}
+                role="tab"
+                id={`tab-${id}`}
+                aria-selected={activeTab === id}
+                aria-controls={`panel-${id}`}
+                onClick={() => setActiveTab(id)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           <div className="tab-panels">

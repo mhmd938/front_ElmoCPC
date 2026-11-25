@@ -2375,6 +2375,25 @@ hr,
   font-variant-numeric: tabular-nums;
 }
 
+.settings-card .kv-value {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 450px) {
+  .settings-card .kv-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .settings-card .kv-value {
+    align-self: stretch;
+    text-align: start;
+  }
+}
+
 /* ------------------------------------------------------------
    25. Empty state / skeleton / spinner
    ------------------------------------------------------------ */

@@ -12,6 +12,7 @@ interface Notification {
 
 interface NotificationsListProps {
   notifications: Notification[];
+  showAll?: boolean;
 }
 
 const getNotificationIcon = (type: string) => {
@@ -29,7 +30,7 @@ const getNotificationIcon = (type: string) => {
   }
 };
 
-const NotificationsList = ({ notifications }: NotificationsListProps) => {
+const NotificationsList = ({ notifications, showAll = false }: NotificationsListProps) => {
   return (
     <section className="stack" aria-labelledby="notifications-title">
       <div className="row">
@@ -37,7 +38,7 @@ const NotificationsList = ({ notifications }: NotificationsListProps) => {
           <Bell className="icon" />
         </span>
         <h2 className="card-title" id="notifications-title">
-          آخرین اطلاعیه‌ها
+          {showAll ? "اطلاعیه‌ها" : "آخرین اطلاعیه‌ها"}
         </h2>
       </div>
 
@@ -50,7 +51,7 @@ const NotificationsList = ({ notifications }: NotificationsListProps) => {
         </div>
       ) : (
         <div className="list">
-          {notifications.slice(0, 3).map((notification) => {
+          {(showAll ? notifications : notifications.slice(0, 3)).map((notification) => {
             const Icon = getNotificationIcon(notification.type);
 
             return (

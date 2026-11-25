@@ -4,8 +4,13 @@ import Sidebar from "../Sidebar";
 
 describe("Dashboard sidebar", () => {
   it.each(["برنامه مسابقات", "اطلاعیه‌ها", "تنظیمات"])(
-    "keeps the unfinished %s tab inert",
+    "navigates to the %s tab",
     (label) => {
+      const targetTab = {
+        "برنامه مسابقات": "schedule",
+        "اطلاعیه‌ها": "notifications",
+        "تنظیمات": "settings",
+      }[label];
       const setActiveTab = vi.fn();
 
       render(
@@ -21,15 +26,15 @@ describe("Dashboard sidebar", () => {
       const tab = screen.getByRole("button", { name: label });
       fireEvent.click(tab);
 
-      expect(setActiveTab).not.toHaveBeenCalled();
-      expect(tab).toHaveAttribute("aria-disabled", "true");
+      expect(setActiveTab).toHaveBeenCalledWith(targetTab);
+      expect(tab).not.toHaveAttribute("aria-disabled", "true");
     }
   );
 
   it.each([
     ["overview", "team", "تیم من"],
     ["team", "overview", "خانه"],
-  ])("navigates from %s to %s", (activeTab, targetTab, label) => {
+  ] as const)("navigates from %s to %s", (activeTab, targetTab, label) => {
     const setActiveTab = vi.fn();
 
     render(
@@ -82,5 +87,19 @@ describe("Dashboard sidebar", () => {
     fireEvent.click(screen.getByRole("button", { name: "کوچک کردن منو" }));
 
     expect(setSidebarOpen).toHaveBeenCalledWith(false);
+  });
+
+  it("keeps collapsed navigation controls named", () => {
+    render(
+      <Sidebar
+        activeTab="overview"
+        setActiveTab={vi.fn()}
+        sidebarOpen={false}
+        setSidebarOpen={vi.fn()}
+        onLogout={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "برنامه مسابقات" })).toBeInTheDocument();
   });
 });
