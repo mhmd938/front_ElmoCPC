@@ -149,8 +149,10 @@ pending-receipt rejection branch; team `11`/receipt `102` is already approved.
   synthetic. A successful “receipt upload” is a local state transition, not a
   payment or network upload.
 - `/camp` is public, but its registration-deadline CTA buttons are intentionally
-  disabled. Dashboard schedule/notification/settings entries are not routed in
-  the current UI. These are presentation limits, not missing mock endpoints.
+  disabled. Dashboard schedule, announcement, and settings entries open panels
+  inside `/dashboard`; the schedule stays pending until dates are confirmed,
+  announcements use the current dashboard list, and settings show the signed-in
+  account details. These panels do not require mock endpoints.
 - API-backed mode keeps the normal transport and credentials. Do not copy
   `elmocpc:mock:*` values into the ordinary API-mode keys.
 

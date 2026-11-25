@@ -1,10 +1,12 @@
 // src/pages/Dashboard/components/Sidebar/Sidebar.tsx
 import { ChevronLeft, LogOut } from "lucide-react";
 import MenuItem from "./menuItem";
+import { dashboardTabs } from "../dashboardTabs";
+import type { DashboardTabId } from "../dashboardTabs";
 
 interface SidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: DashboardTabId;
+  setActiveTab: (tab: DashboardTabId) => void;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   onLogout: () => void;
@@ -17,24 +19,6 @@ const Sidebar = ({
   setSidebarOpen,
   onLogout,
 }: SidebarProps) => {
-  const menuItems = [
-    { id: "overview", label: "خانه", icon: "User", disabled: false },
-    { id: "team", label: "تیم من", icon: "Users", disabled: false },
-    {
-      id: "schedule",
-      label: "برنامه مسابقات",
-      icon: "Calendar",
-      disabled: true,
-    },
-    {
-      id: "notifications",
-      label: "اطلاعیه‌ها",
-      icon: "Bell",
-      disabled: true,
-    },
-    { id: "settings", label: "تنظیمات", icon: "Settings", disabled: true },
-  ];
-
   return (
     <aside className={`sidebar${sidebarOpen ? "" : " is-collapsed"}`}>
       <div className="sidebar-head">
@@ -62,7 +46,7 @@ const Sidebar = ({
       </div>
 
       <nav className="sidebar-nav" aria-label="بخش‌های داشبورد">
-        {menuItems.map((item) => (
+        {dashboardTabs.map((item) => (
           <MenuItem
             key={item.id}
             id={item.id}
@@ -70,7 +54,6 @@ const Sidebar = ({
             icon={item.icon}
             activeTab={activeTab}
             sidebarOpen={sidebarOpen}
-            disabled={item.disabled}
             onClick={() => {
               setActiveTab(item.id);
               if (window.innerWidth <= 900) setSidebarOpen(false);

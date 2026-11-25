@@ -1,5 +1,5 @@
 // src/pages/Dashboard/components/SettingsSection.tsx
-import SectionCard from "./Common/SectionCard";
+import { Settings } from "lucide-react";
 
 interface SettingsSectionProps {
   userData: {
@@ -12,25 +12,28 @@ interface SettingsSectionProps {
 
 const SettingsSection = ({ userData }: SettingsSectionProps) => {
   return (
-    <SectionCard>
-      <h2 className="text-2xl font-bold mb-6">اطلاعات حساب کاربری</h2>
-      <div className="space-y-4">
-        <div>
-          <label className="text-sm text-gray-400">نام و نام خانوادگی</label>
-          <p className="text-lg font-semibold">
-            {userData.name} {userData.familyName}
-          </p>
-        </div>
-        <div>
-          <label className="text-sm text-gray-400">ایمیل</label>
-          <p className="text-lg font-semibold">{userData.email}</p>
-        </div>
-        <div>
-          <label className="text-sm text-gray-400">شماره موبایل</label>
-          <p className="text-lg font-semibold">{userData.phone}</p>
-        </div>
+    <section className="card stack settings-card">
+      <div className="row">
+        <span className="stat-icon is-cyan" aria-hidden="true">
+          <Settings className="icon" />
+        </span>
+        <h2 className="card-title">اطلاعات حساب کاربری</h2>
       </div>
-    </SectionCard>
+      <dl className="kv-list">
+        <div className="kv-row">
+          <dt className="kv-key">نام و نام خانوادگی</dt>
+          <dd className="kv-value">{userData.name} {userData.familyName}</dd>
+        </div>
+        <div className="kv-row">
+          <dt className="kv-key">ایمیل</dt>
+          <dd className="kv-value"><bdi dir="ltr">{userData.email}</bdi></dd>
+        </div>
+        <div className="kv-row">
+          <dt className="kv-key">شماره موبایل</dt>
+          <dd className="kv-value"><bdi dir="ltr">{userData.phone}</bdi></dd>
+        </div>
+      </dl>
+    </section>
   );
 };
 
