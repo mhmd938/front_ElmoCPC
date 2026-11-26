@@ -1,10 +1,14 @@
-// src/components/Landing/Sections/TimelineSection.tsx
-type TimelineStatus = "done" | "active" | "upcoming";
+import {
+  getTimelineMarker,
+  type TimelineMarkerRole,
+  type TimelineStatus,
+} from "./timelineMarkers";
 
 interface TimelineEvent {
   date: string;
   title: string;
   status: TimelineStatus;
+  markerRole?: TimelineMarkerRole;
   badge: string;
   badgeClass: string;
   description: string;
@@ -39,6 +43,7 @@ const timeline: TimelineEvent[] = [
     date: "۱۸ آذر ۱۴۰۴",
     title: "اعلام لیست نهایی تیم‌ها",
     status: "upcoming",
+    markerRole: "old",
     badge: "پیش رو",
     badgeClass: "badge-neutral",
     description: "اعلام اسامی تیم‌های واجد شرایط برای شرکت در مسابقه",
@@ -47,6 +52,7 @@ const timeline: TimelineEvent[] = [
     date: "۲۱ آذر ۱۴۰۴",
     title: "روز برگزاری مسابقه",
     status: "upcoming",
+    markerRole: "king",
     badge: "پیش رو",
     badgeClass: "badge-neutral",
     description: "برگزاری مسابقه در دانشگاه علم و صنعت",
@@ -55,6 +61,7 @@ const timeline: TimelineEvent[] = [
     date: "۲۱ آذر ۱۴۰۴",
     title: "مراسم اختتامیه و اهدای جوایز",
     status: "upcoming",
+    markerRole: "egg",
     badge: "پیش رو",
     badgeClass: "badge-neutral",
     description: "مراسم اختتامیه و اهدای جوایز به تیم‌های برتر",
@@ -76,7 +83,14 @@ const TimelineSection = () => {
         <ol className="timeline">
           {timeline.map((event) => (
             <li className={`timeline-item is-${event.status}`} key={event.title}>
-              <span className="timeline-dot" aria-hidden="true" />
+              <img
+                className="timeline-marker"
+                src={getTimelineMarker(event.status, event.markerRole)}
+                alt=""
+                width={48}
+                height={48}
+                loading="lazy"
+              />
               <div className="timeline-body">
                 <div className="timeline-meta">
                   <span className="timeline-date">{event.date}</span>

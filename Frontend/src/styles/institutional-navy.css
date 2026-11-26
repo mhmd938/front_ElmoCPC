@@ -1318,6 +1318,8 @@ hr,
    12. Timeline
    ------------------------------------------------------------ */
 .timeline {
+  --timeline-marker-size: 48px;
+  --timeline-marker-offset: 12px;
   display: grid;
   gap: 0;
   max-width: 52rem;
@@ -1327,7 +1329,7 @@ hr,
 .timeline-item {
   position: relative;
   display: grid;
-  grid-template-columns: 16px minmax(0, 1fr);
+  grid-template-columns: var(--timeline-marker-size) minmax(0, 1fr);
   gap: var(--space-4);
   padding-bottom: var(--space-6);
 }
@@ -1339,9 +1341,9 @@ hr,
 .timeline-item::before {
   content: "";
   position: absolute;
-  top: 20px;
-  bottom: calc(-1 * var(--space-6));
-  inset-inline-start: 7px;
+  top: calc(var(--timeline-marker-offset) + var(--timeline-marker-size));
+  bottom: calc(-1 * var(--timeline-marker-offset));
+  inset-inline-start: calc(var(--timeline-marker-size) / 2 - 1px);
   width: 2px;
   background: var(--border);
 }
@@ -1350,26 +1352,12 @@ hr,
   display: none;
 }
 
-.timeline-dot {
-  width: 14px;
-  height: 14px;
-  margin-top: 6px;
-  border-radius: var(--radius-full);
-  background: var(--foreground);
-  box-shadow: 0 0 0 4px var(--background);
-}
-
-.timeline-item.is-done .timeline-dot {
-  background: var(--success);
-}
-
-.timeline-item.is-active .timeline-dot {
-  background: var(--status-waiting);
-}
-
-.timeline-item.is-upcoming .timeline-dot {
-  background: var(--muted);
-  border: 2px solid var(--border);
+.timeline-marker {
+  display: block;
+  width: var(--timeline-marker-size);
+  height: var(--timeline-marker-size);
+  margin-block-start: var(--timeline-marker-offset);
+  object-fit: contain;
 }
 
 .timeline-body {
