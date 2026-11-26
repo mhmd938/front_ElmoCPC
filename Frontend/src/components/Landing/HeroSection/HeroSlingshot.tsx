@@ -102,8 +102,8 @@ function createFlight(width: number, height: number): FlightPlan {
   const sprite = SPRITES[Math.floor(Math.random() * SPRITES.length)] ?? SPRITES[0];
   const durationMs = 1100 + Math.random() * 400;
   const routeDurationSeconds = (durationMs - TERMINAL_CLEARANCE_MS) / 1000;
-  const redSize = width < 768 ? 48 : 64;
-  const size = Math.round((redSize * sprite.bmu) / 100);
+  const baseSpriteSize = width < 768 ? 33 : 44;
+  const size = Math.round((baseSpriteSize * sprite.bmu) / 100);
   const maxPitchRadians = (MAX_PITCH_DEGREES * Math.PI) / 180;
   const rotatedHalfExtent = (size / 2) * (Math.cos(maxPitchRadians) + Math.sin(maxPitchRadians));
   const rotationClearance = rotatedHalfExtent - size / 2 + 1;
