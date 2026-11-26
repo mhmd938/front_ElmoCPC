@@ -99,7 +99,6 @@
   position: relative;
   isolation: isolate;
   background:
-    radial-gradient(circle, rgb(160 213 255 / 17%) 1px, transparent 1.5px) center / 28px 28px,
     radial-gradient(ellipse at 82% 15%, rgb(43 139 215 / 27%), transparent 60%),
     radial-gradient(ellipse at 12% 70%, rgb(51 181 206 / 12%), transparent 54%),
     linear-gradient(145deg, #092444, #0a355a 58%, #082542);
@@ -298,12 +297,7 @@
   border-radius: var(--radius);
 }
 
-.timeline-dot {
-  margin-top: 1.4rem;
-}
-
 .timeline-item::before {
-  top: 2rem;
   background: var(--event-line);
 }
 
@@ -316,13 +310,6 @@
   color: var(--brand-yellow);
 }
 
-.timeline-item.is-active .timeline-dot {
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 0 0 4px var(--background);
-}
-
-.timeline-item.is-active .timeline-dot::after,
 .timeline-item.is-active .timeline-meta .dot::after {
   position: absolute;
   inset: -5px;
@@ -751,7 +738,6 @@
     transform: none;
   }
 
-  .timeline-item.is-active .timeline-dot::after,
   .timeline-item.is-active .timeline-meta .dot::after {
     animation: none;
   }

@@ -238,8 +238,8 @@ afterEach(() => {
 
 describe("HeroSlingshot", () => {
   it.each([
-    [0, 48, 36], [1, 86, 65], [2, 74, 55], [3, 90, 67],
-    [4, 134, 101], [5, 83, 62], [6, 58, 43], [7, 115, 86],
+    [0, 33, 25], [1, 59, 45], [2, 51, 38], [3, 62, 46],
+    [4, 92, 69], [5, 57, 43], [6, 40, 30], [7, 79, 59],
   ])("sizes catalog entry %i at each hero width", (index, laptop, phone) => {
     for (const [width, expected] of [[1366, laptop], [390, phone]]) {
       resizeOverlay(width, 700);
@@ -345,7 +345,8 @@ describe("HeroSlingshot", () => {
     { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width: 375, height: 780 },
     { entry: "right", exit: "side", entryRandom: 0.9, exitRandom: 0.1, width: 375, height: 780 },
     { entry: "right", exit: "bottom", entryRandom: 0.9, exitRandom: 0.9, width: 375, height: 780 },
-    { entry: "left", exit: "bottom", expectedExit: "side", entryRandom: 0.1, exitRandom: 0.9, width: 120, height: 780, targetRandom: 0 },
+    { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width: 120, height: 780, targetRandom: 0 },
+    { entry: "left", exit: "bottom", expectedExit: "side", entryRandom: 0.1, exitRandom: 0.9, width: 80, height: 780, targetRandom: 0 },
     ...[1366, 390, 320, 280, 180].flatMap((width) => [
       { entry: "left", exit: "side", entryRandom: 0.1, exitRandom: 0.1, width, height: 780, targetRandom: 0.5 },
       { entry: "left", exit: "bottom", entryRandom: 0.1, exitRandom: 0.9, width, height: 780, targetRandom: 0 },
